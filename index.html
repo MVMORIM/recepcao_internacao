@@ -1,1294 +1,2405 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SGRH — Relatório Compartilhado de Demandas & Visitas</title>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<style>
-:root{--bg:#f4f6f8;--card:#fff;--tx:#1b2430;--mut:#667085;--bd:#d9dee5;--pri:#0b5cab;--pt:#fff;--red:#d00000;--ok:#1b2430;--hd:#e8eef6;--warn:#b45309;--warnbg:#fef3c7;--grn:#15803d;--grnbg:#dcfce7}
-:root[data-t="d"]{--bg:#10151c;--card:#18202a;--tx:#e6ebf1;--mut:#97a3b3;--bd:#2c3744;--pri:#4d9be6;--pt:#08121e;--red:#ff6b6b;--ok:#e6ebf1;--hd:#1f2a37;--warn:#fbbf24;--warnbg:#451a03;--grn:#4ade80;--grnbg:#052e16}
-@media (prefers-color-scheme:dark){:root:not([data-t]){--bg:#10151c;--card:#18202a;--tx:#e6ebf1;--mut:#97a3b3;--bd:#2c3744;--pri:#4d9be6;--pt:#08121e;--red:#ff6b6b;--ok:#e6ebf1;--hd:#1f2a37;--warn:#fbbf24;--warnbg:#451a03;--grn:#4ade80;--grnbg:#052e16}}
-*{box-sizing:border-box}[hidden]{display:none!important}
-body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--tx)}
-header{background:var(--card);border-bottom:1px solid var(--bd);padding:10px 16px;position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-h1{font-size:16px;margin:0 auto 0 0}
-button,select,input{font:inherit;color:var(--tx)}
-button,select{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:6px 10px;cursor:pointer}
-button:hover{border-color:var(--pri)}
-.on{background:var(--pri)!important;color:var(--pt)!important;border-color:var(--pri)!important}
-main{max-width:1200px;margin:0 auto;padding:12px 16px 40px}
-.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
-.tabs button{border-radius:0;font-weight:600}.tabs button:first-child{border-radius:6px 0 0 6px}.tabs button:last-child{border-radius:0 6px 6px 0}
-.days{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
-.d{min-width:36px;padding:5px 0;text-align:center;position:relative}
-.d.has::after{content:"";position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:var(--red)}
-.meta{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
-input[type=text],input:not([type]),input[type=tel]{border:1px solid var(--bd);border-radius:6px;padding:6px 8px;background:var(--bg);width:100%}
-input:focus,select:focus{outline:2px solid var(--pri);outline-offset:0}
-.meta label{flex:1;min-width:240px}
-.leg,.tip{color:var(--mut);font-size:12px}.r{color:var(--red)}
-.sec{background:var(--card);border:1px solid var(--bd);border-radius:8px;margin-bottom:14px;overflow:hidden}
-.sec h2{margin:0;padding:8px 12px;font-size:13px;letter-spacing:.04em;background:var(--hd);display:flex;align-items:center;gap:8px}
-.sec h2 span{color:var(--mut);font-weight:400}.sec h2 button{margin-left:auto}
-.empty{padding:10px 12px;color:var(--mut)}
-.rec{margin:10px;padding:10px;border:1px solid var(--bd);border-left:5px solid var(--ok);border-radius:8px;background:var(--bg)}
-.rec.a{border-left-color:var(--red)}
-.rh{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}.rh .x{margin-left:auto}
-.sg button{border-radius:0}.sg button:first-child{border-radius:6px 0 0 6px}.sg button:last-child{border-radius:0 6px 6px 0}
-.rec.a .sg .on{background:var(--red)!important;border-color:var(--red)!important;color:#fff!important}
-.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
-.g label,.fh{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em}.g label input{display:block;margin-top:2px;text-transform:none;font-size:14px}
-.g .w{grid-column:span 2}
-.in-row{display:flex;gap:4px;align-items:center;margin-top:2px}
-.in-row input{margin-top:0!important}
-.now-btn{padding:5px 7px;font-size:12px;flex-shrink:0;background:var(--card)}
-.badge-warn{background:var(--warnbg);color:var(--warn);font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px}
-.badge-ok{background:var(--grnbg);color:var(--grn);font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px}
-.fm{margin-top:10px;padding-top:8px;border-top:1px dashed var(--bd)}
-.fr{display:grid;grid-template-columns:160px 2fr 1fr 1fr auto;gap:6px;margin:5px 0}
-.vr{display:grid;grid-template-columns:2fr 150px 1fr 1fr 84px 84px auto;gap:6px;margin:5px 0;align-items:center}
-.rec.a .g input{color:var(--red)}
-.x{color:var(--mut)}.x:hover{color:var(--red)}
-.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
-.kp div,.cd{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px}.kp b{display:block;font-size:24px}
-.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}.cd h3{margin:0 0 8px;font-size:13px}
-.br{display:grid;grid-template-columns:150px 1fr 40px;gap:8px;align-items:center;margin:4px 0;font-size:12px}.br i{display:block;height:12px;background:var(--pri);border-radius:3px;min-width:2px}.br b{text-align:right}
-.vol{display:flex;align-items:flex-end;gap:2px;height:110px}.vol i{flex:1;background:var(--pri);border-radius:2px 2px 0 0;min-height:1px}.vl{display:flex;gap:2px;font-size:9px;color:var(--mut)}.vl span{flex:1;text-align:center}
-.pl{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:14px;margin-bottom:14px}.pl h3{margin:0}.pl h4{margin:12px 0 4px;font-size:12px}
-.pl table{width:100%;border-collapse:collapse;font-size:12px}.pl th,.pl td{border:1px solid var(--bd);padding:4px 6px;text-align:left;vertical-align:top}.pl tr.a td{color:var(--red)}
-dialog{border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);max-width:560px;width:92%}dialog::backdrop{background:#0008}
-.res{max-height:50vh;overflow:auto}.res div{padding:6px 4px;border-bottom:1px solid var(--bd);cursor:pointer}
-#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 14px;border-radius:8px;opacity:0;transition:.25s;pointer-events:none;z-index:9}#toast.s{opacity:1}
-@media(max-width:780px){.fr,.vr{grid-template-columns:1fr 1fr}.g .w{grid-column:auto}}
-@media print{header,.bar,.days,.tabs,.sec button,.rh button,.fm button,.fr .x,.vr .x,.now-btn{display:none!important}body{background:#fff;color:#000}.rec,.sec,.pl{break-inside:avoid}.pl,.sec{border-color:#999}#v-op .meta{display:flex!important}#colab{border:0;background:transparent}}
-#aviso{border-color:var(--red)}#aviso span{flex:1;min-width:220px}.bk{width:100%;border-collapse:collapse}.bk td,.bk th{padding:5px 8px;border-bottom:1px solid var(--bd);text-align:left;font-size:13px}.ok{color:#198754}
-.pi{cursor:pointer;margin:6px 0}.pi:hover{border-color:var(--pri)}.chip{display:inline-block;background:var(--hd);border-radius:12px;padding:2px 10px;margin:2px 4px 2px 0;font-size:12px}.ev{margin:8px 0;padding:10px;border:1px solid var(--bd);border-left:5px solid var(--ok);border-radius:8px;background:var(--card)}.ev.a{border-left-color:var(--red)}.ev.a .st1{color:var(--red)}.ev .f span{margin-right:16px;display:inline-block}.ev .rh{margin-bottom:4px;flex-wrap:wrap}
-#bkDir{font-weight:600}
-@media print{#v-pac .meta,[data-pa]{display:none!important}.ev{break-inside:avoid}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGRH — Relatório Compartilhado de Demandas & Visitas</title>
+
+  <!-- Bibliotecas Externas (com fallbacks offline) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+            colors: {
+              clinical: { 900: '#0F172A', 800: '#1E293B', 700: '#0F4C81', 600: '#0284C7', 500: '#0EA5E9', 100: '#E0F2FE', 50: '#F0F9FF' }
+            }
+          }
+        }
+      };
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Convenção hospitalar: Vermelho = Agendada/Pendente | Preto = Realizada */
+    .status-agendado { background-color: #DC2626; color: #FFFFFF; border: 1px solid #B91C1C; }
+    .status-realizado { background-color: #18181B; color: #FFFFFF; border: 1px solid #27272A; }
+    .row-agendado { border-left: 4px solid #DC2626; }
+    .row-realizado { border-left: 4px solid #18181B; }
+
+    .day-pill-active { box-shadow: 0 4px 12px -2px rgba(2, 132, 199, 0.35); }
+
+    /* Suporte a Tema Escuro */
+    html.dark body { background-color: #0f172a; color: #e2e8f0; }
+    html.dark .bg-white { background-color: #1e293b !important; color: #e2e8f0; }
+    html.dark .bg-slate-50 { background-color: #0f172a !important; }
+    html.dark .bg-slate-100 { background-color: #334155 !important; }
+    html.dark .border-slate-200, html.dark .border-slate-200\/80, html.dark .border-slate-100, html.dark .border-slate-300 { border-color: #334155 !important; }
+    html.dark .text-slate-900, html.dark .text-slate-800 { color: #f1f5f9 !important; }
+    html.dark .text-slate-700, html.dark .text-slate-600 { color: #cbd5e1 !important; }
+    html.dark .text-slate-500, html.dark .text-slate-400 { color: #94a3b8 !important; }
+    html.dark input, html.dark select { background-color: #0f172a !important; color: #f1f5f9 !important; border-color: #475569 !important; }
+
+    @media print {
+      body { background: #FFFFFF !important; color: #000000 !important; font-size: 11px !important; }
+      .no-print { display: none !important; }
+      .print-card { border: 1px solid #cbd5e1 !important; box-shadow: none !important; break-inside: avoid; margin-bottom: 12px !important; }
+      .status-agendado { background-color: #DC2626 !important; color: #FFFFFF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .status-realizado { background-color: #18181B !important; color: #FFFFFF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .txt-agendado { color: #DC2626 !important; font-weight: 700 !important; }
+    }
+  </style>
 </head>
-<body>
-<header>
-  <h1>🏥 SGRH — Relatório Compartilhado de Demandas</h1>
-  <button id="bBusca">🔍 Buscar</button><button id="bXlsx">📥 Importar planilha</button><button id="bBk">💾 Backup</button><button id="bCsv">📄 CSV do mês</button><button id="bPrint">🖨️ Imprimir</button><button id="bTema">🌓</button>
-  <input type="file" id="file" accept=".json,application/json" hidden>
-  <input type="file" id="fileXlsx" accept=".xlsx" hidden>
-</header>
-<main>
-  <div class="meta" id="aviso" hidden></div>
-  <div class="bar tabs" id="tabs">
-    <button data-v="op">📝 Operacional</button>
-    <button data-v="vis">🪪 Controle de Visitas</button>
-    <button data-v="dash">📊 Painel do mês</button>
-    <button data-v="pac">🧑‍⚕️ Paciente</button>
-    <button data-v="pl">🖨️ Passagem de plantão</button>
-  </div>
-  <div class="bar" id="nav"><label>Mês <select id="mes"></select></label><label>Ano <select id="ano"></select></label><span class="tip" id="info"></span></div>
-  <div class="days" id="days"></div>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-  <div class="v" id="v-op">
-    <div class="bar">
-      <div class="tabs" id="turno"><button data-t="SD">☀️ Diurno (SD)</button><button data-t="SN">🌙 Noturno (SN)</button></div>
-      <label>Setor <select id="fltSetorOp">
-        <option value="">Todos os setores</option>
-        <option value="001 - POSTO A">001 - POSTO A</option>
-        <option value="002 - POSTO B">002 - POSTO B</option>
-        <option value="003 - POSTO C">003 - POSTO C</option>
-        <option value="004 - POSTO E">004 - POSTO E</option>
-        <option value="005 - UTI 1">005 - UTI 1</option>
-        <option value="006 - UTI 2">006 - UTI 2</option>
-      </select></label>
-      <label>Mostrar <select id="flt"><option value="">Todas</option><option value="a">Só agendadas</option><option value="r">Só realizadas</option></select></label>
-      <button id="bPullPend" title="Importa para este turno as demandas agendadas (vermelhas) do turno anterior">📥 Puxar agendadas pendentes</button>
-      <span class="leg"><b class="r">Vermelho = agendada</b> · Preto = realizada</span>
+  <!-- HEADER / NAVBAR -->
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-slate-800 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+
+        <!-- Brand & Seletor Mês/Ano -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 flex items-center justify-center shadow-inner shrink-0">
+              <i data-lucide="activity" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">SGRH</h1>
+                <div class="flex items-center gap-1 bg-slate-800 border border-slate-700 rounded-lg px-1.5 py-0.5">
+                  <select id="sel-mes" onchange="changeMonthYear()" class="bg-transparent text-sky-300 text-xs font-bold focus:outline-none cursor-pointer"></select>
+                  <span class="text-slate-500 text-xs">/</span>
+                  <select id="sel-ano" onchange="changeMonthYear()" class="bg-transparent text-sky-300 text-xs font-bold focus:outline-none cursor-pointer"></select>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400" id="header-month-info">Relatório Compartilhado de Demandas & Visitas</p>
+            </div>
+          </div>
+
+          <button onclick="openModal()" class="md:hidden inline-flex items-center gap-1.5 bg-sky-600 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow">
+            <i data-lucide="plus" class="w-4 h-4"></i> Novo
+          </button>
+        </div>
+
+        <!-- Global Actions -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="switchTab('pac')" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 transition" title="Buscar histórico completo do paciente">
+            <i data-lucide="user-search" class="w-3.5 h-3.5 text-teal-400"></i>
+            <span class="hidden sm:inline">Paciente</span>
+          </button>
+
+          <input type="file" id="fileXlsx" accept=".xlsx" hidden onchange="handleFileImport(event)">
+          <button onclick="document.getElementById('fileXlsx').click()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 transition" title="Importar planilha Excel">
+            <i data-lucide="file-up" class="w-3.5 h-3.5 text-sky-400"></i>
+            <span>Importar</span>
+          </button>
+
+          <button onclick="openBackupModal()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 transition" title="Backup, pasta e restauração">
+            <i data-lucide="database-backup" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Backup</span>
+          </button>
+
+          <button onclick="exportCSV()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-3 py-2 rounded-lg border border-slate-700 transition" title="Exportar CSV do mês">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span class="hidden sm:inline">CSV</span>
+          </button>
+
+          <button onclick="toggleTheme()" class="inline-flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium p-2 rounded-lg border border-slate-700 transition" title="Alternar tema claro/escuro">
+            <i data-lucide="moon" class="w-3.5 h-3.5 text-slate-300"></i>
+          </button>
+
+          <button onclick="openModal()" class="hidden md:inline-flex items-center gap-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Nova Demanda</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <nav class="flex space-x-1 overflow-x-auto pt-1 pb-0 border-t border-slate-800/80">
+        <button onclick="switchTab('operacional')" id="tab-operacional" class="tab-btn flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-sky-400 text-white whitespace-nowrap transition">
+          <i data-lucide="clipboard-list" class="w-4 h-4 text-sky-400"></i> Operacional
+        </button>
+        <button onclick="switchTab('visitas')" id="tab-visitas" class="tab-btn flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap transition">
+          <i data-lucide="id-card" class="w-4 h-4"></i> Controle de Visitas
+        </button>
+        <button onclick="switchTab('pac')" id="tab-pac" class="tab-btn flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap transition">
+          <i data-lucide="stethoscope" class="w-4 h-4"></i> Histórico Paciente
+        </button>
+        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap transition">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Painel do Mês
+        </button>
+        <button onclick="switchTab('busca')" id="tab-busca" class="tab-btn flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap transition">
+          <i data-lucide="search" class="w-4 h-4"></i> Busca Global
+        </button>
+        <button onclick="switchTab('plantao')" id="tab-plantao" class="tab-btn flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap transition">
+          <i data-lucide="printer" class="w-4 h-4"></i> Passagem de Plantão
+        </button>
+      </nav>
     </div>
-    <div class="meta"><b id="titDia"></b><label>Colaboradores do turno <input id="colab" list="dl-colaboradores" placeholder="Ex.: MARISTELA / DELIS"></label><span id="kpiDia" class="tip"></span></div>
-    <div id="secs"></div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 print-container">
+
+    <!-- AVISO DE BACKUP PENDENTE -->
+    <div id="backup-warning-banner" class="hidden mb-4 bg-amber-50 border border-amber-300 text-amber-900 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm no-print">
+      <div class="flex items-center gap-2.5 text-xs font-semibold">
+        <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 shrink-0"></i>
+        <span id="backup-warning-text">Há alterações não salvas em backup neste mês.</span>
+      </div>
+      <button onclick="bkMes(mk())" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition">💾 Salvar backup deste mês</button>
+    </div>
+
+    <!-- SELETOR DE DIAS COMPARTILHADO (Operacional, Visitas, Plantão) -->
+    <div id="shared-day-bar" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 mb-5 no-print">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="calendar-days" class="w-4 h-4 text-sky-600"></i>
+          <h2 class="text-sm font-bold text-slate-800">Selecione o Dia do Mês</h2>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
+          <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-500"></span> Com movimentação</span>
+          <span>• <b class="text-red-600">Vermelho = Agendada</b> | <b>Preto = Realizada</b></span>
+        </div>
+      </div>
+      <div id="day-selector-strip" class="flex gap-1.5 overflow-x-auto pb-1 select-none"></div>
+    </div>
+
+    <!-- ==================== ABA 1: OPERACIONAL ==================== -->
+    <section id="view-operacional" class="space-y-5">
+
+      <!-- Controles de Turno e Colaboradores -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-sky-600">Plantão Ativo</span>
+              <span id="selected-day-badge" class="font-mono text-xs font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md border border-slate-200">--/--/----</span>
+            </div>
+            <h3 id="selected-day-title" class="text-xl font-extrabold text-slate-900 mt-1 capitalize">Carregando...</h3>
+          </div>
+          <div class="mt-4 bg-slate-100 p-1 rounded-xl grid grid-cols-3 gap-1 border border-slate-200/70">
+            <button onclick="setShiftFilter('ALL')" id="shift-btn-ALL" class="shift-btn py-2 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition">Todos (SD + SN)</button>
+            <button onclick="setShiftFilter('SD')" id="shift-btn-SD" class="shift-btn py-2 px-3 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5"><i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500"></i> SD</button>
+            <button onclick="setShiftFilter('SN')" id="shift-btn-SN" class="shift-btn py-2 px-3 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5"><i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-500"></i> SN</button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 flex flex-col justify-between">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+            <div class="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3">
+              <div class="flex items-center justify-between mb-1">
+                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800"><i data-lucide="sun" class="w-3.5 h-3.5 text-amber-600"></i> Diurno (SD)</span>
+                <button onclick="editCollaborators('SD')" class="text-amber-700 p-1 rounded hover:bg-amber-100 transition" title="Editar equipe SD"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+              </div>
+              <p id="collab-text-SD" class="text-xs font-semibold text-slate-800 break-words min-h-[1.25rem]">—</p>
+            </div>
+            <div class="bg-indigo-50/60 border border-indigo-200/80 rounded-xl p-3">
+              <div class="flex items-center justify-between mb-1">
+                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-800"><i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-600"></i> Noturno (SN)</span>
+                <button onclick="editCollaborators('SN')" class="text-indigo-700 p-1 rounded hover:bg-indigo-100 transition" title="Editar equipe SN"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+              </div>
+              <p id="collab-text-SN" class="text-xs font-semibold text-slate-800 break-words min-h-[1.25rem]">—</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2.5 border-t border-slate-100">
+            <span id="day-status-summary" class="text-xs font-semibold text-slate-700">0 agendadas • 0 realizadas</span>
+            <div class="flex flex-wrap items-center gap-2 no-print">
+              <button onclick="pullPendingFromPrevShift()" class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2.5 py-1.5 rounded-lg transition" title="Importa para o turno ativo as demandas agendadas do turno anterior">
+                <i data-lucide="arrow-down-to-line" class="w-3.5 h-3.5"></i> Puxar agendadas pendentes
+              </button>
+              <button onclick="copyShiftSummary()" class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-2.5 py-1.5 rounded-lg transition">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i> WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs Diários -->
+      <div id="daily-kpi-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5"></div>
+
+      <!-- Filtros Operacionais -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl border border-slate-200/80 shadow-sm no-print">
+        <div class="flex flex-wrap items-center gap-2 flex-1">
+          <select id="daily-sector-filter" onchange="renderOperationalView()" class="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="">Todos os setores</option>
+            <option value="001 - POSTO A">001 - POSTO A</option>
+            <option value="002 - POSTO B">002 - POSTO B</option>
+            <option value="003 - POSTO C">003 - POSTO C</option>
+            <option value="004 - POSTO E">004 - POSTO E</option>
+            <option value="005 - UTI 1">005 - UTI 1</option>
+            <option value="006 - UTI 2">006 - UTI 2</option>
+          </select>
+          <select id="daily-status-filter" onchange="renderOperationalView()" class="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="">Todos os status</option>
+            <option value="a">Só Agendadas (Vermelho)</option>
+            <option value="r">Só Realizadas (Preto)</option>
+          </select>
+          <input type="text" id="daily-quick-filter" oninput="renderOperationalView()" placeholder="Filtrar por paciente, leito, exame, familiar..." class="w-full sm:max-w-xs pl-3 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+        </div>
+        <button onclick="openModal()" class="text-xs font-semibold text-white bg-sky-600 hover:bg-sky-500 px-3.5 py-1.5 rounded-lg shadow-sm shrink-0">+ Adicionar Registro</button>
+      </div>
+
+      <div id="categories-container" class="space-y-4"></div>
+    </section>
+
+    <!-- ==================== ABA 2: CONTROLE DE VISITAS ==================== -->
+    <section id="view-visitas" class="hidden space-y-5">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-teal-600">Portaria & Recepção</span>
+          <h2 id="tit-visitas" class="text-lg font-extrabold text-slate-900">Controle de Visitas — Dia --/--/----</h2>
+          <p id="kpi-visitas" class="text-xs text-slate-600 mt-0.5">0 paciente(s) • 0 visitante(s) • 0 no leito agora</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 no-print">
+          <button onclick="pullPatientsToVisits()" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 px-3 py-2 rounded-xl transition" title="Cria cartões de visita a partir dos pacientes registrados nos turnos SD/SN hoje">
+            <i data-lucide="users" class="w-3.5 h-3.5 text-sky-600"></i> Importar pacientes do dia
+          </button>
+          <button onclick="addVisitPatient()" class="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-teal-600 hover:bg-teal-500 px-3.5 py-2 rounded-xl shadow-sm transition">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> + Novo Paciente / Visita
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros de Visitas -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2 bg-white px-4 py-3 rounded-xl border border-slate-200/80 shadow-sm no-print">
+        <select id="vis-sector-filter" onchange="renderVisitasView()" class="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <option value="">Todos os setores</option>
+          <option value="001 - POSTO A">001 - POSTO A</option>
+          <option value="002 - POSTO B">002 - POSTO B</option>
+          <option value="003 - POSTO C">003 - POSTO C</option>
+          <option value="004 - POSTO E">004 - POSTO E</option>
+          <option value="005 - UTI 1">005 - UTI 1</option>
+          <option value="006 - UTI 2">006 - UTI 2</option>
+        </select>
+        <input type="text" id="vis-quick-filter" oninput="renderVisitasView()" placeholder="Filtrar visitas por paciente, leito, visitante, crachá ou 'em andamento'..." class="w-full max-w-md pl-3 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+      </div>
+
+      <div id="visitas-list-container" class="space-y-4"></div>
+    </section>
+
+    <!-- ==================== ABA 3: HISTÓRICO DO PACIENTE ==================== -->
+    <section id="view-pac" class="hidden space-y-5">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 no-print">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900">Histórico Completo do Paciente</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Linha do tempo em todos os meses: admissões, transferências, exames, visitas, altas, óbito e demandas.</p>
+          </div>
+          <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-sm self-start"><i data-lucide="printer" class="w-3.5 h-3.5"></i> Imprimir Ficha</button>
+        </div>
+        <div class="mt-4 relative">
+          <i data-lucide="user-search" class="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="pac-search-input" oninput="onPacSearchInput(this.value)" placeholder="Digite o nome ou parte do nome do paciente..." class="w-full pl-11 pr-4 py-3 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
+        </div>
+      </div>
+      <div id="pac-timeline-container" class="space-y-4"></div>
+    </section>
+
+    <!-- ==================== ABA 4: DASHBOARD / PAINEL DO MÊS ==================== -->
+    <section id="view-dashboard" class="hidden space-y-6">
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-900 rounded-2xl p-6 text-white shadow-md">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-sky-300" id="dash-month-label">Consolidado Mensal</span>
+            <h2 class="text-2xl font-extrabold mt-1">Indicadores Gerenciais</h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-1">Fluxo de pacientes, visitas, produtividade por turno e escala de colaboradores.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/15">
+              <p class="text-[10px] text-sky-200 uppercase font-semibold">Demandas</p>
+              <p id="dash-total-records" class="text-2xl font-extrabold text-white">0</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/15">
+              <p class="text-[10px] text-red-200 uppercase font-semibold">Agendadas</p>
+              <p id="dash-total-ag" class="text-2xl font-extrabold text-red-300">0</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/15">
+              <p class="text-[10px] text-emerald-200 uppercase font-semibold">Realizadas</p>
+              <p id="dash-total-re" class="text-2xl font-extrabold text-emerald-300">0</p>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/15">
+              <p class="text-[10px] text-teal-200 uppercase font-semibold">Visitas</p>
+              <p id="dash-total-vis" class="text-2xl font-extrabold text-teal-300">0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="dash-kpi-cards" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div class="lg:col-span-8 bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+          <h3 class="text-base font-bold text-slate-900 mb-4">Evolução Diária de Movimentações</h3>
+          <div class="relative h-72 w-full"><canvas id="chart-daily-volume"></canvas></div>
+        </div>
+        <div class="lg:col-span-4 bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex flex-col">
+          <h3 class="text-base font-bold text-slate-900 mb-4">Distribuição por Categoria</h3>
+          <div class="relative h-64 w-full flex-1 flex items-center justify-center"><canvas id="chart-category-dist"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Plantões por Colaborador & Turno -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+          <h3 class="text-base font-bold text-slate-900 mb-3">Comparativo Diurno (SD) × Noturno (SN)</h3>
+          <div id="dash-shift-bars" class="space-y-3"></div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
+          <h3 class="text-base font-bold text-slate-900 mb-3">Plantões por Colaborador</h3>
+          <div id="dash-collab-bars" class="space-y-2.5 max-h-60 overflow-y-auto"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ABA 5: BUSCA GLOBAL ==================== -->
+    <section id="view-busca" class="hidden space-y-5">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+        <div class="max-w-3xl">
+          <h2 class="text-lg font-extrabold text-slate-900">Busca Global em Todos os Meses</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Pesquise por paciente, setor, leito, CPF, exame, familiar ou visitante.</p>
+        </div>
+        <div class="mt-4 relative">
+          <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="global-search-input" oninput="renderGlobalSearch()" placeholder="Ex: FRANCISCO DE ASSIS, 005 - UTI 1, TC DE CRÂNIO, VISITANTE..." class="w-full pl-11 pr-4 py-3 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
+        </div>
+      </div>
+      <div id="global-search-results" class="space-y-3"></div>
+    </section>
+
+    <!-- ==================== ABA 6: PASSAGEM DE PLANTÃO / IMPRESSÃO ==================== -->
+    <section id="view-plantao" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 no-print">
+        <div>
+          <h2 class="text-base font-extrabold text-slate-900">Passagem de Plantão & Impressão</h2>
+          <p class="text-xs text-slate-500">Inclui demandas SD/SN e controle de visitas do dia selecionado.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="print-day-select" onchange="syncPrintDay(this.value)" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg px-3 py-2"></select>
+          <select id="print-shift-select" onchange="renderPrintView()" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg px-3 py-2">
+            <option value="ALL">Turno Completo (SD + SN + Visitas)</option>
+            <option value="SD">Somente SD</option>
+            <option value="SN">Somente SN</option>
+          </select>
+          <button onclick="copyShiftSummary()" class="inline-flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-sm"><i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar WhatsApp</button>
+          <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-slate-900 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm"><i data-lucide="printer" class="w-4 h-4"></i> Imprimir</button>
+        </div>
+      </div>
+      <div id="printable-sheet" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 print-card"></div>
+    </section>
+
+    <p class="text-[11px] text-slate-400 mt-8 text-center no-print">
+      Dados salvos localmente neste navegador (100% offline). Use <b>💾 Backup</b> regularmente para salvar cópias seguras em arquivo JSON.
+    </p>
+  </main>
+
+  <!-- DATALISTS -->
+  <datalist id="dl-setores">
+    <option value="001 - POSTO A"></option>
+    <option value="002 - POSTO B"></option>
+    <option value="003 - POSTO C"></option>
+    <option value="004 - POSTO E"></option>
+    <option value="005 - UTI 1"></option>
+    <option value="006 - UTI 2"></option>
+  </datalist>
+  <datalist id="dl-pacientes-dia"></datalist>
+
+  <!-- ==================== MODAL: NOVA / EDITAR DEMANDA ==================== -->
+  <div id="crud-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl overflow-hidden my-8">
+      <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
+        <h3 id="crud-modal-title" class="text-base font-bold">Nova Demanda Hospitalar</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="crud-form" onsubmit="handleSaveRecord(event)" class="p-6 space-y-4 max-h-[85vh] overflow-y-auto">
+        <input type="hidden" id="form-edit-mode" value="create">
+        <input type="hidden" id="form-orig-day" value="">
+        <input type="hidden" id="form-orig-turno" value="">
+        <input type="hidden" id="form-orig-cat" value="">
+        <input type="hidden" id="form-orig-idx" value="">
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Data *</label>
+            <select id="form-day" required class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Turno *</label>
+            <select id="form-turno" required class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5">
+              <option value="SD">SD — Diurno</option>
+              <option value="SN">SN — Noturno</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Categoria *</label>
+            <select id="form-category" onchange="updateFormDynamicFields()" required class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5">
+              <option value="adm">1. Admissões</option>
+              <option value="alt">2. Altas</option>
+              <option value="tex">3. Transferências Externas</option>
+              <option value="tin">4. Transferências Internas</option>
+              <option value="obi">5. Óbito</option>
+              <option value="exa">6. Exames / Procedimentos</option>
+              <option value="dem">7. Demandas Extras</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+          <div class="sm:col-span-8">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Paciente *</label>
+            <input type="text" id="form-paciente" list="dl-pacientes-dia" required class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 uppercase" placeholder="Nome completo do paciente">
+          </div>
+          <div class="sm:col-span-4">
+            <button type="button" onclick="autofillModalPatient()" class="w-full py-2.5 px-3 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-xs font-bold transition" title="Preenche leito e familiares se o paciente já foi registrado hoje">
+              ⚡ Puxar dados do dia
+            </button>
+          </div>
+        </div>
+
+        <!-- Campos dinâmicos por categoria -->
+        <div id="dynamic-category-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+        <!-- Familiares / Contatos múltiplos -->
+        <div class="border-t border-dashed border-slate-200 pt-3">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Familiares / Contatos</span>
+            <button type="button" onclick="addModalFamilyRow()" class="text-xs font-semibold text-sky-600 hover:text-sky-800 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200">+ Familiar</button>
+          </div>
+          <div id="modal-family-list" class="space-y-2"></div>
+        </div>
+
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-wrap items-center gap-5">
+          <span class="text-xs font-bold text-slate-800">Status:</span>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="radio" name="form-status" value="a" class="w-4 h-4 text-red-600" checked>
+            <span class="text-xs font-bold text-red-600">Agendada (Vermelho)</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="radio" name="form-status" value="r" class="w-4 h-4 text-slate-900">
+            <span class="text-xs font-bold text-slate-800">Realizada (Preto)</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Cancelar</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 rounded-xl shadow-sm">Salvar Registro</button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <div class="v" id="v-vis" hidden>
-    <div class="meta">
-      <b id="titVis"></b>
-      <span id="kpiVis" class="tip"></span>
-      <button id="bPullPacVis" title="Cria cartões de visita a partir dos pacientes internados/admitidos hoje">📋 Importar pacientes do dia</button>
-      <button class="on" id="bAddVis">+ Novo Paciente / Visita</button>
+  <!-- ==================== MODAL: COLABORADORES ==================== -->
+  <div id="collab-modal" class="fixed inset-0 z-50 hidden bg-slate-900/60 flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+      <div class="bg-slate-900 px-5 py-3.5 flex justify-between text-white">
+        <h3 class="text-sm font-bold">Editar Colaboradores do Turno</h3>
+        <button onclick="closeCollabModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form onsubmit="saveCollaborators(event)" class="p-5 space-y-4">
+        <input type="hidden" id="collab-turno-input">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Equipe Escalada</label>
+          <input type="text" id="collab-names-input" list="dl-colaboradores" placeholder="Ex.: MARISTELA / DELIS" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 uppercase">
+          <datalist id="dl-colaboradores">
+            <option value="MATEUS"></option>
+            <option value="ELZA"></option>
+            <option value="DELIS"></option>
+            <option value="ROZIVANE"></option>
+            <option value="MAYARA"></option>
+            <option value="MARISTELA"></option>
+          </datalist>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" onclick="closeCollabModal()" class="px-3.5 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Cancelar</button>
+          <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-teal-600 rounded-xl">Salvar</button>
+        </div>
+      </form>
     </div>
-    <div class="bar">
-      <select id="fltSetorVis" aria-label="Filtrar por setor">
-        <option value="">Todos os setores</option>
-        <option value="001 - POSTO A">001 - POSTO A</option>
-        <option value="002 - POSTO B">002 - POSTO B</option>
-        <option value="003 - POSTO C">003 - POSTO C</option>
-        <option value="004 - POSTO E">004 - POSTO E</option>
-        <option value="005 - UTI 1">005 - UTI 1</option>
-        <option value="006 - UTI 2">006 - UTI 2</option>
-      </select>
-      <input id="fltVis" placeholder="Filtrar visitas do dia por paciente, leito, visitante ou status (ex.: em andamento)..." style="max-width:420px;background:var(--card)">
-    </div>
-    <div id="visList"></div>
   </div>
 
-  <div class="v" id="v-dash" hidden></div>
-  <div class="v" id="v-pl" hidden></div>
-  <div class="v" id="v-pac" hidden></div>
-  <p class="tip">Dados salvos <b>somente neste navegador</b> (funciona 100% offline). Use <b>💾 Backup</b> para salvar um arquivo por mês e guarde cópias em local seguro — não o publique no GitHub, pois contém dados de pacientes.</p>
-</main>
-<dialog id="dlg"><form method="dialog"><h3 style="margin-top:0">Buscar em todos os meses</h3><input id="q" placeholder="Paciente, leito, familiar, CPF, exame, visitante..."><div class="res" id="res"></div><p style="text-align:right"><button>Fechar</button></p></form></dialog>
-<dialog id="dbk"><form method="dialog"><h3 style="margin-top:0">💾 Backup e segurança dos dados</h3><div id="bkbox"></div><p style="text-align:right"><button>Fechar</button></p></form></dialog>
+  <!-- ==================== MODAL: BACKUP & SEGURANÇA ==================== -->
+  <div id="backup-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden my-8">
+      <div class="bg-slate-900 px-5 py-3.5 flex justify-between items-center text-white">
+        <h3 class="text-sm font-bold">💾 Backup e Segurança dos Dados</h3>
+        <button onclick="closeBackupModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="bkbox" class="p-5 space-y-4 text-xs"></div>
+    </div>
+  </div>
 
-<datalist id="dl-leitos">
-  <option value="001 - POSTO A"><option value="002 - POSTO B"><option value="003 - POSTO C">
-  <option value="004 - POSTO E"><option value="005 - UTI 1"><option value="006 - UTI 2">
-  <option value="L.01 (001 - POSTO A)"><option value="L.02 (001 - POSTO A)"><option value="L.03 (001 - POSTO A)"><option value="L.04 (001 - POSTO A)"><option value="L.05 (001 - POSTO A)">
-  <option value="L.06 (001 - POSTO A)"><option value="L.07 (001 - POSTO A)"><option value="L.08 (001 - POSTO A)"><option value="L.09 (001 - POSTO A)"><option value="L.10 (001 - POSTO A)">
-  <option value="L.14 (002 - POSTO B)"><option value="L.17 (002 - POSTO B)">
-  <option value="L.18 (003 - POSTO C)"><option value="L.19 (003 - POSTO C)">
-  <option value="L.24 (004 - POSTO E)"><option value="L.28 (004 - POSTO E)"><option value="L.29 (004 - POSTO E)"><option value="L.33 (004 - POSTO E)">
-  <option value="L.04 (005 - UTI 1)"><option value="L.08 (005 - UTI 1)"><option value="L.09 (005 - UTI 1)"><option value="L.10 (005 - UTI 1)">
-  <option value="L.36 (006 - UTI 2)"><option value="L.39 (006 - UTI 2)">
-</datalist>
-<datalist id="dl-pacientes-dia"></datalist>
-<datalist id="dl-colaboradores">
-  <option value="MATEUS">
-  <option value="ELZA">
-  <option value="DELIS">
-  <option value="ROZIVANE">
-  <option value="MAYARA">
-  <option value="MARISTELA">
-</datalist>
+  <!-- Toast -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
 
-<div id="toast"></div>
-<script>
-const KEY='relatorio_demandas_v1';
-const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const SECS=[
-  ['adm','ADMISSÕES',['Paciente','Leito','Horário / Origem / CID']],
-  ['alt','ALTAS',['Paciente','Leito','Horário']],
-  ['tex','TRANSFERÊNCIAS EXTERNAS',['Paciente','Leito','Horário','Local de destino']],
-  ['tin','TRANSFERÊNCIAS INTERNAS',['Paciente','Horário','Leito de origem','Leito de destino']],
-  ['obi','ÓBITO',['Paciente','Leito','Horário']],
-  ['exa','EXAMES / PROCEDIMENTOS',['Paciente','Leito','Saída','Retorno','Exame / Procedimento']],
-  ['dem','DEMANDAS EXTRAS',['Paciente','Leito','Horário','Demanda realizada']]
-];
-const OLD={adm:5,alt:5,tex:6,tin:6,obi:5,exa:7,dem:6};
-const PAR=['Pai','Mãe','Filho(a)','Esposo(a)','Irmão(ã)','Neto(a)','Avô/Avó','Tio(a)','Sobrinho(a)','Primo(a)','Genro/Nora','Cunhado(a)','Amigo(a)','Vizinho(a)','Cuidador(a)','Responsável legal','Advogado(a)','Visita religiosa','Profissional de saúde','Outro','Sem acompanhante','Desceu sozinho'];
-const $=s=>document.querySelector(s);
-const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const p2=n=>String(n).padStart(2,'0');
-const NF=()=>({p:'',n:'',c:'',t:''});
-const NV=()=>({n:'',p:'',c:'',cracha:'',in:'',out:''});
-const nowHHMM=()=>{const d=new Date();return `${p2(d.getHours())}:${p2(d.getMinutes())}`};
+  <!-- LÓGICA UNIFICADA DO SISTEMA -->
+  <script>
+    const KEY = 'relatorio_demandas_v1';
+    const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const SETORES_LISTA = ['001 - POSTO A', '002 - POSTO B', '003 - POSTO C', '004 - POSTO E', '005 - UTI 1', '006 - UTI 2'];
+    const PAR = ['Pai','Mãe','Filho(a)','Esposo(a)','Irmão(ã)','Neto(a)','Avô/Avó','Tio(a)','Sobrinho(a)','Primo(a)','Genro/Nora','Cunhado(a)','Amigo(a)','Vizinho(a)','Cuidador(a)','Responsável legal','Advogado(a)','Visita religiosa','Profissional de saúde','Outro','Sem acompanhante','Desceu sozinho'];
 
-function mig(d){
-  for(const m of Object.values(d)){
-    for(const dia of Object.values(m)){
-      if(dia.visitas && !Array.isArray(dia.visitas)) dia.visitas=[];
-      for(const [k,b] of Object.entries(dia)){
-        if(k==='visitas') continue;
-        for(const [sk,rows] of Object.entries(b.secs||{})){
-          for(const r of rows){
-            if(!r.f){
-              const n=r.v.length;
-              if(n===OLD[sk]){const f=r.v[n-2]||'',t=r.v[n-1]||'';r.v=r.v.slice(0,n-2);r.f=(f||t)?[{p:'',n:f,c:'',t}]:[]}
-              else r.f=[];
-            } else if(r.v.length===OLD[sk]){
-              r.v=r.v.slice(0,OLD[sk]-2);
+    const SECS = [
+      ['adm', 'Admissões', 'log-in', ['Paciente', 'Setor / Leito', 'Horário / Origem / CID']],
+      ['alt', 'Altas', 'log-out', ['Paciente', 'Setor / Leito', 'Horário']],
+      ['tex', 'Transf. Externas', 'ambulance', ['Paciente', 'Setor / Leito', 'Horário', 'Local de destino']],
+      ['tin', 'Transf. Internas', 'arrow-right-left', ['Paciente', 'Horário', 'Setor / Leito de origem', 'Setor / Leito de destino']],
+      ['obi', 'Óbitos', 'heart-off', ['Paciente', 'Setor / Leito', 'Horário']],
+      ['exa', 'Exames / Proc.', 'stethoscope', ['Paciente', 'Setor / Leito', 'Saída', 'Retorno', 'Exame / Procedimento']],
+      ['dem', 'Demandas Extras', 'clipboard-check', ['Paciente', 'Setor / Leito', 'Horário', 'Demanda realizada']]
+    ];
+    const OLD = { adm: 5, alt: 5, tex: 6, tin: 6, obi: 5, exa: 7, dem: 6 };
+
+    const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const p2 = n => String(n).padStart(2, '0');
+    const nrm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+    const NF = () => ({ p: '', n: '', c: '', t: '' });
+    const NV = () => ({ n: '', p: '', c: '', cracha: '', in: '', out: '' });
+    const nowHHMM = () => { const d = new Date(); return `${p2(d.getHours())}:${p2(d.getMinutes())}`; };
+    const nd = (a, m) => new Date(a, m, 0).getDate();
+
+    const mcpf = s => s.replace(/\D/g, '').slice(0, 11).replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1-$2');
+    function mtel(s) {
+      if (/[^\d()\s-]/.test(s)) return s;
+      const d = s.replace(/\D/g, '');
+      if (d.length > 11) return s;
+      return d.length > 10 ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}` : d.length > 6 ? `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}` : d.length > 2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d;
+    }
+
+    const famTxt = f => (f || []).filter(x => x.n || x.p || x.c || x.t).map(x => [x.n, x.p && `(${x.p})`, x.c && 'CPF ' + x.c, x.t && '☎ ' + x.t].filter(Boolean).join(' ')).join(' | ');
+    const visTxt = v => (v || []).filter(x => x.n).map(x => [x.n, x.p && `(${x.p})`, x.c && 'CPF ' + x.c, x.cracha && 'Crachá/Tel:' + x.cracha, x.in && 'Ent:' + x.in, x.out && 'Saída:' + x.out].filter(Boolean).join(' ')).join(' | ');
+
+    function mig(d) {
+      for (const m of Object.values(d)) {
+        if (!m || typeof m !== 'object') continue;
+        for (const dia of Object.values(m)) {
+          if (!dia || typeof dia !== 'object') continue;
+          if (dia.visitas && !Array.isArray(dia.visitas)) dia.visitas = [];
+          for (const [k, b] of Object.entries(dia)) {
+            if (k === 'visitas' || !b || typeof b !== 'object') continue;
+            for (const [sk, rows] of Object.entries(b.secs || {})) {
+              for (const r of rows) {
+                if (!r.f) {
+                  const n = (r.v || []).length;
+                  if (n === OLD[sk]) {
+                    const f = r.v[n - 2] || '', t = r.v[n - 1] || '';
+                    r.v = r.v.slice(0, n - 2);
+                    r.f = (f || t) ? [{ p: '', n: f, c: '', t }] : [];
+                  } else r.f = [];
+                } else if ((r.v || []).length === OLD[sk]) {
+                  r.v = r.v.slice(0, OLD[sk] - 2);
+                }
+              }
             }
           }
         }
       }
     }
-  }
-}
 
-let db={};try{db=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){db={}}mig(db);
-let meta={};try{meta=JSON.parse(localStorage.getItem(KEY+'_meta')||'{}')}catch(e){}meta.bk=meta.bk||{};meta.alt=meta.alt||{};
-const hoje=new Date();
-let st={v:'op',ano:hoje.getFullYear(),mes:hoje.getMonth()+1,dia:hoje.getDate(),turno:'SD',flt:'',fltSetorOp:'',fltVis:'',fltSetorVis:'',pq:'',pk:''},tmr;
+    let db = {};
+    try { db = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { db = {}; }
+    mig(db);
 
-function save(){
-  meta.alt[mk()]=Date.now();
-  clearTimeout(tmr);
-  tmr=setTimeout(()=>{
-    try{
-      localStorage.setItem(KEY,JSON.stringify(db));
-      localStorage.setItem(KEY+'_meta',JSON.stringify(meta));
-    }catch(e){
-      saveMeta();
-      toast('⚠️ Armazenamento cheio! Salve um backup agora.');
+    let meta = {};
+    try { meta = JSON.parse(localStorage.getItem(KEY + '_meta') || '{}'); } catch (e) { meta = {}; }
+    meta.bk = meta.bk || {};
+    meta.alt = meta.alt || {};
+
+    const hoje = new Date();
+    let st = {
+      v: 'operacional',
+      ano: hoje.getFullYear(),
+      mes: hoje.getMonth() + 1,
+      dia: hoje.getDate(),
+      shift: 'ALL',
+      pq: '',
+      pk: ''
+    };
+    let tmr = null;
+    let chartVolumeInstance = null;
+    let chartCategoryInstance = null;
+
+    const mk = (a = st.ano, m = st.mes) => `${a}-${p2(m)}`;
+    const dtxt = (d = st.dia) => `${p2(d)}/${p2(st.mes)}/${st.ano}`;
+    const fdd = (k, d) => `${p2(d)}/${k.slice(5)}/${k.slice(0, 4)}`;
+
+    function save() {
+      meta.alt[mk()] = Date.now();
+      clearTimeout(tmr);
+      tmr = setTimeout(() => {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(db));
+          localStorage.setItem(KEY + '_meta', JSON.stringify(meta));
+        } catch (e) {
+          saveMeta();
+          toast('⚠️ Armazenamento cheio! Salve um backup agora.', 'error');
+        }
+      }, 200);
+      aviso();
     }
-  },250);
-  aviso();
-}
-function toast(m){const t=$('#toast');t.textContent=m;t.className='s';clearTimeout(toast.t);toast.t=setTimeout(()=>t.className='',2600)}
-const mk=(a=st.ano,m=st.mes)=>`${a}-${p2(m)}`,nd=(a,m)=>new Date(a,m,0).getDate();
 
-function blk(c,t=st.turno,d=st.dia){
-  let m=db[mk()];if(!m){if(!c)return null;m=db[mk()]={}}
-  let x=m[d];if(!x){if(!c)return null;x=m[d]={}}
-  let b=x[t];if(!b){if(!c)return null;b=x[t]={colab:'',secs:{}}}
-  SECS.forEach(s=>{if(!b.secs[s[0]])b.secs[s[0]]=[]});
-  return b;
-}
-function visList(c,d=st.dia){
-  let m=db[mk()];if(!m){if(!c)return [];m=db[mk()]={}}
-  let x=m[d];if(!x){if(!c)return [];x=m[d]={}}
-  if(!Array.isArray(x.visitas)){if(!c)return [];x.visitas=[]}
-  return x.visitas;
-}
+    function saveMeta() {
+      try { localStorage.setItem(KEY + '_meta', JSON.stringify(meta)); } catch (e) {}
+    }
 
-const vazia=r=>!r.v.some(Boolean)&&!(r.f||[]).some(f=>f.n||f.p||f.c||f.t);
-const cnt=b=>b&&b.secs?Object.values(b.secs).reduce((a,rows)=>a+rows.filter(r=>!vazia(r)).length,0):0;
-const cntVis=d=>{const x=(db[mk()]||{})[d];return x&&Array.isArray(x.visitas)?x.visitas.reduce((a,p)=>a+(p.v?p.v.filter(v=>v.n).length:0),0):0};
-const tem=d=>{const x=(db[mk()]||{})[d];if(!x)return false;return ['SD','SN'].some(t=>cnt(x[t]))||(Array.isArray(x.visitas)&&x.visitas.length>0)};
+    function toast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg ${type === 'error' ? 'bg-red-600' : 'bg-slate-800 border border-slate-700'}`;
+      el.textContent = msg;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
 
-const mcpf=s=>s.replace(/\D/g,'').slice(0,11).replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1-$2');
-function mtel(s){if(/[^\d()\s-]/.test(s))return s;const d=s.replace(/\D/g,'');if(d.length>11)return s;return d.length>10?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:d.length>6?`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`:d.length>2?`(${d.slice(0,2)}) ${d.slice(2)}`:d}
-const famTxt=f=>(f||[]).filter(x=>x.n||x.p||x.c||x.t).map(x=>[x.n,x.p&&`(${x.p})`,x.c&&'CPF '+x.c,x.t&&'☎ '+x.t].filter(Boolean).join(' ')).join(' | ');
-const visTxt=v=>(v||[]).filter(x=>x.n).map(x=>[x.n,x.p&&`(${x.p})`,x.c&&'CPF '+x.c,x.cracha&&'Crachá/Tel:'+x.cracha,x.in&&'Ent:'+x.in,x.out&&'Saída:'+x.out].filter(Boolean).join(' ')).join(' | ');
-const nrm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();
+    function refreshIcons() {
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
 
-function getPatientsOfDay(d=st.dia){
-  const map=new Map();
-  const x=(db[mk()]||{})[d]||{};
-  ['SD','SN'].forEach(t=>{
-    const b=x[t];if(!b||!b.secs)return;
-    SECS.forEach(([k])=>{
-      (b.secs[k]||[]).forEach(r=>{
-        const nome=(r.v[0]||'').trim();
-        const key=nrm(nome);if(!key)return;
-        const leito=k==='tin'?(r.v[3]||r.v[2]||''):(r.v[1]||'');
-        const prev=map.get(key)||{nome,leito:'',fams:[]};
-        if(leito) prev.leito=leito;
-        if(r.f&&r.f.length) prev.fams=JSON.parse(JSON.stringify(r.f));
-        map.set(key,prev);
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      try { localStorage.setItem(KEY + '_tema', isDark ? 'd' : 'l'); } catch (e) {}
+    }
+
+    /* ==================== ESTRUTURA DE DADOS ==================== */
+    function blk(c, t = 'SD', d = st.dia, k = mk()) {
+      let m = db[k];
+      if (!m) { if (!c) return null; m = db[k] = {}; }
+      let x = m[d];
+      if (!x) { if (!c) return null; x = m[d] = {}; }
+      let b = x[t];
+      if (!b) { if (!c) return null; b = x[t] = { colab: '', secs: {} }; }
+      if (!b.secs) b.secs = {};
+      SECS.forEach(s => { if (!Array.isArray(b.secs[s[0]])) b.secs[s[0]] = []; });
+      return b;
+    }
+
+    function visList(c, d = st.dia, k = mk()) {
+      let m = db[k];
+      if (!m) { if (!c) return []; m = db[k] = {}; }
+      let x = m[d];
+      if (!x) { if (!c) return []; x = m[d] = {}; }
+      if (!Array.isArray(x.visitas)) { if (!c) return []; x.visitas = []; }
+      return x.visitas;
+    }
+
+    const vazia = r => !(r.v || []).some(Boolean) && !(r.f || []).some(f => f.n || f.p || f.c || f.t);
+    const cnt = b => b && b.secs ? Object.values(b.secs).reduce((a, rows) => a + rows.filter(r => !vazia(r)).length, 0) : 0;
+    const cntVis = (d, k = mk()) => {
+      const x = (db[k] || {})[d];
+      return x && Array.isArray(x.visitas) ? x.visitas.reduce((a, p) => a + (p.v ? p.v.filter(v => v.n).length : 0), 0) : 0;
+    };
+    const tem = (d, k = mk()) => {
+      const x = (db[k] || {})[d];
+      if (!x) return false;
+      return ['SD', 'SN'].some(t => cnt(x[t])) || (Array.isArray(x.visitas) && x.visitas.length > 0);
+    };
+
+    function getPatientsOfDay(d = st.dia, k = mk()) {
+      const map = new Map();
+      const x = (db[k] || {})[d] || {};
+      ['SD', 'SN'].forEach(t => {
+        const b = x[t];
+        if (!b || !b.secs) return;
+        SECS.forEach(([sk]) => {
+          (b.secs[sk] || []).forEach(r => {
+            const nome = (r.v[0] || '').trim();
+            const key = nrm(nome);
+            if (!key) return;
+            const leito = sk === 'tin' ? (r.v[3] || r.v[2] || '') : (r.v[1] || '');
+            const prev = map.get(key) || { nome, leito: '', fams: [] };
+            if (leito) prev.leito = leito;
+            if (r.f && r.f.length) prev.fams = JSON.parse(JSON.stringify(r.f));
+            map.set(key, prev);
+          });
+        });
       });
-    });
-  });
-  (x.visitas||[]).forEach(p=>{
-    const nome=(p.pac||'').trim();
-    const key=nrm(nome);if(!key)return;
-    const prev=map.get(key)||{nome,leito:'',fams:[]};
-    if(p.leito) prev.leito=p.leito;
-    map.set(key,prev);
-  });
-  return [...map.values()];
-}
-function refreshPatientDatalist(){
-  const list=getPatientsOfDay();
-  $('#dl-pacientes-dia').innerHTML=list.map(p=>`<option value="${esc(p.nome)}">${esc(p.leito)}</option>`).join('');
-}
+      (x.visitas || []).forEach(p => {
+        const nome = (p.pac || '').trim();
+        const key = nrm(nome);
+        if (!key) return;
+        const prev = map.get(key) || { nome, leito: '', fams: [] };
+        if (p.leito) prev.leito = p.leito;
+        map.set(key, prev);
+      });
+      return [...map.values()];
+    }
 
-function init(){
-  $('#mes').innerHTML=MESES.map((n,i)=>`<option value="${i+1}">${n}</option>`).join('');
-  const ys=new Set([hoje.getFullYear()-1,hoje.getFullYear(),hoje.getFullYear()+1]);Object.keys(db).forEach(k=>ys.add(+k.slice(0,4)));
-  $('#ano').innerHTML=[...ys].sort().map(y=>`<option>${y}</option>`).join('');render();
-}
-$('#mes').onchange=e=>{st.mes=+e.target.value;st.dia=Math.min(st.dia,nd(st.ano,st.mes));render()};
-$('#ano').onchange=e=>{st.ano=+e.target.value;st.dia=Math.min(st.dia,nd(st.ano,st.mes));render()};
-$('#tabs').onclick=e=>{const b=e.target.closest('button');if(b){st.v=b.dataset.v;render()}};
-$('#turno').onclick=e=>{const b=e.target.closest('button');if(b){st.turno=b.dataset.t;render()}};
-$('#flt').onchange=e=>{st.flt=e.target.value;render()};
-$('#colab').oninput=e=>{blk(true).colab=e.target.value;save()};
-$('#days').onclick=e=>{const b=e.target.closest('.d');if(b){st.dia=+b.dataset.d;render()}};
+    function refreshPatientDatalist() {
+      const list = getPatientsOfDay();
+      document.getElementById('dl-pacientes-dia').innerHTML = list.map(p => `<option value="${esc(p.nome)}">${esc(p.leito)}</option>`).join('');
+    }
 
-function render(){
-  $('#mes').value=st.mes;
-  if(![...$('#ano').options].some(o=>+o.value===st.ano))$('#ano').add(new Option(st.ano,st.ano));
-  $('#ano').value=st.ano;
-  document.querySelectorAll('.v').forEach(v=>v.hidden=v.id!=='v-'+st.v);
-  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===st.v));
-  $('.days').hidden=st.v==='dash'||st.v==='pac';
-  $('#nav').hidden=st.v==='pac';
-  let h='';for(let d=1;d<=nd(st.ano,st.mes);d++)h+=`<button class="d${d===st.dia?' on':''}${tem(d)?' has':''}" data-d="${d}">${d}</button>`;
-  $('#days').innerHTML=h;
-  const diasAtivos=Object.keys(db[mk()]||{}).filter(d=>tem(+d)).length;
-  $('#info').textContent=`${diasAtivos} dia(s) com registros em ${MESES[st.mes-1]}/${st.ano}`;
-  refreshPatientDatalist();
-  aviso();
-  if(st.v==='op')renderOp();
-  else if(st.v==='vis')renderVis();
-  else if(st.v==='dash')renderDash();
-  else if(st.v==='pac')renderPac();
-  else renderPl();
-}
-const dtxt=()=>`${p2(st.dia)}/${p2(st.mes)}/${st.ano}`;
+    /* ==================== INICIALIZAÇÃO & NAVEGAÇÃO ==================== */
+    function populateSelectors() {
+      const selMes = document.getElementById('sel-mes');
+      selMes.innerHTML = MESES.map((n, i) => `<option value="${i + 1}">${n}</option>`).join('');
 
-function renderOp(){
-  document.querySelectorAll('#turno button').forEach(b=>b.classList.toggle('on',b.dataset.t===st.turno));
-  $('#flt').value=st.flt;
-  const b=blk(false);
-  $('#colab').value=b?b.colab:'';
-  $('#titDia').textContent=`DIA ${dtxt()} (${new Date(st.ano,st.mes-1,st.dia).toLocaleDateString('pt-BR',{weekday:'long'})}) — TURNO ${st.turno}`;
-  let a=0,r=0;if(b)Object.values(b.secs).forEach(x=>x.filter(v=>!vazia(v)).forEach(y=>y.s==='a'?a++:r++));
-  $('#kpiDia').innerHTML=`<b class="r">${a} agendada(s)</b> · ${r} realizada(s)`;
-  const box=$('#secs');box.innerHTML='';
-  SECS.forEach(([k,t,labs])=>{
-    const rows=b?b.secs[k]:[];
-    const s=document.createElement('section');s.className='sec';
-    let h=`<h2>${t} <span>(${rows.filter(r=>!vazia(r)).length})</span><button class="on" data-add="${k}">+ Adicionar</button></h2>`;
-    if(!rows.length)h+='<div class="empty">Nenhum registro. Clique em “+ Adicionar”.</div>';
-    rows.forEach((x,i)=>{
-      if(st.flt&&x.s!==st.flt)return;
-      if(st.fltSetorOp){
-        const setorNome=st.fltSetorOp.replace(/^\d+\s*-\s*/,'');
-        const leito=k==='tin'?(x.v[3]||x.v[2]||''):(x.v[1]||'');
-        const lNrm=nrm(leito);
-        if(!lNrm.includes(nrm(st.fltSetorOp)) && !lNrm.includes(nrm(setorNome))) return;
+      const selAno = document.getElementById('sel-ano');
+      const ys = new Set([hoje.getFullYear() - 1, hoje.getFullYear(), hoje.getFullYear() + 1]);
+      Object.keys(db).forEach(k => ys.add(+k.slice(0, 4)));
+      selAno.innerHTML = [...ys].sort().map(y => `<option value="${y}">${y}</option>`).join('');
+
+      updateDayDropdowns();
+    }
+
+    function updateDayDropdowns() {
+      const maxD = nd(st.ano, st.mes);
+      let opts = '';
+      for (let i = 1; i <= maxD; i++) {
+        opts += `<option value="${i}">Dia ${p2(i)}</option>`;
       }
-      const aguardandoExame=(k==='exa' && x.v[2] && !x.v[3]);
-      h+=`<div class="rec ${x.s}" data-k="${k}" data-i="${i}">
-        <div class="rh">
-          <b>#${i+1}</b>
-          <span class="sg">
-            <button data-act="s" data-v="a" class="${x.s==='a'?'on':''}">Agendada</button>
-            <button data-act="s" data-v="r" class="${x.s==='r'?'on':''}">Realizada</button>
-          </span>
-          <button data-act="autofill" title="Preenche leito e familiares se o paciente já foi registrado hoje">⚡ Puxar dados do dia</button>
-          <button data-act="hist" title="Ver todos os registros deste paciente">🧑‍⚕️ Histórico do paciente</button>
-          ${aguardandoExame?'<span class="badge-warn">⏳ Aguardando retorno</span>':''}
-          <button class="x" data-act="del">✕ Excluir</button>
-        </div>
-        <div class="g">${labs.map((l,j)=>{
-          const isPac=j===0;
-          const isLeito=l.toLowerCase().includes('leito');
-          const isTime=/horário|saída|retorno/i.test(l) && k!=='adm';
-          return `<label class="${j===0?'w':''}">${l}
-            <div class="in-row">
-              <input data-j="${j}" value="${esc(x.v[j])}" ${isPac?'list="dl-pacientes-dia"':''} ${isLeito?'list="dl-leitos"':''}>
-              ${isTime?`<button type="button" class="now-btn" data-act="now" data-j="${j}" title="Hora atual">🕒</button>`:''}
+      const fDay = document.getElementById('form-day');
+      const pDay = document.getElementById('print-day-select');
+      if (fDay) fDay.innerHTML = opts;
+      if (pDay) {
+        pDay.innerHTML = opts;
+        pDay.value = String(st.dia);
+      }
+    }
+
+    function init() {
+      try {
+        if (localStorage.getItem(KEY + '_tema') === 'd') document.documentElement.classList.add('dark');
+      } catch (e) {}
+      loadDirHandle();
+      populateSelectors();
+      renderAll();
+    }
+
+    function changeMonthYear() {
+      st.mes = +document.getElementById('sel-mes').value;
+      st.ano = +document.getElementById('sel-ano').value;
+      st.dia = Math.min(st.dia, nd(st.ano, st.mes));
+      updateDayDropdowns();
+      renderAll();
+    }
+
+    function switchTab(tabId) {
+      st.v = tabId;
+      document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = "tab-btn flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap transition";
+      });
+      const active = document.getElementById(`tab-${tabId}`);
+      if (active) active.className = "tab-btn flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-sky-400 text-white whitespace-nowrap transition";
+
+      const showDayStrip = ['operacional', 'visitas', 'plantao'].includes(tabId);
+      document.getElementById('shared-day-bar').classList.toggle('hidden', !showDayStrip);
+
+      if (tabId === 'operacional') renderOperationalView();
+      else if (tabId === 'visitas') renderVisitasView();
+      else if (tabId === 'pac') renderPacView();
+      else if (tabId === 'dashboard') renderDashboard();
+      else if (tabId === 'busca') renderGlobalSearch();
+      else if (tabId === 'plantao') {
+        document.getElementById('print-day-select').value = String(st.dia);
+        renderPrintView();
+      }
+      refreshIcons();
+    }
+
+    function setShiftFilter(shift) {
+      st.shift = shift;
+      ['ALL', 'SD', 'SN'].forEach(s => {
+        const btn = document.getElementById(`shift-btn-${s}`);
+        if (s === shift) btn.className = "shift-btn py-2 px-3 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-1.5";
+        else btn.className = "shift-btn py-2 px-3 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5";
+      });
+      renderOperationalView();
+    }
+
+    function selectDay(day) {
+      st.dia = day;
+      renderDaySelector();
+      if (st.v === 'operacional') renderOperationalView();
+      else if (st.v === 'visitas') renderVisitasView();
+      else if (st.v === 'plantao') {
+        document.getElementById('print-day-select').value = String(day);
+        renderPrintView();
+      }
+    }
+
+    function syncPrintDay(val) {
+      st.dia = +val;
+      renderDaySelector();
+      renderPrintView();
+    }
+
+    function renderAll() {
+      document.getElementById('sel-mes').value = String(st.mes);
+      if (![...document.getElementById('sel-ano').options].some(o => +o.value === st.ano)) {
+        document.getElementById('sel-ano').add(new Option(st.ano, st.ano));
+      }
+      document.getElementById('sel-ano').value = String(st.ano);
+
+      const diasAtivos = Object.keys(db[mk()] || {}).filter(d => tem(+d)).length;
+      document.getElementById('header-month-info').textContent = `${diasAtivos} dia(s) com registros em ${MESES[st.mes - 1]}/${st.ano}`;
+
+      refreshPatientDatalist();
+      aviso();
+      renderDaySelector();
+
+      if (st.v === 'operacional') renderOperationalView();
+      else if (st.v === 'visitas') renderVisitasView();
+      else if (st.v === 'pac') renderPacView();
+      else if (st.v === 'dashboard') renderDashboard();
+      else if (st.v === 'plantao') renderPrintView();
+    }
+
+    function renderDaySelector() {
+      const strip = document.getElementById('day-selector-strip');
+      strip.innerHTML = '';
+      const maxD = nd(st.ano, st.mes);
+      for (let i = 1; i <= maxD; i++) {
+        const hasData = tem(i);
+        const btn = document.createElement('button');
+        btn.onclick = () => selectDay(i);
+        let cls = "day-pill min-w-[40px] h-10 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center border border-slate-200 ";
+        if (i === st.dia) cls += "bg-sky-600 text-white day-pill-active border-sky-600";
+        else cls += "bg-white text-slate-600 hover:bg-slate-100";
+        btn.className = cls;
+        btn.innerHTML = `${p2(i)} ${hasData ? '<span class="w-1.5 h-1.5 rounded-full bg-red-500 mt-0.5"></span>' : ''}`;
+        strip.appendChild(btn);
+      }
+    }
+
+    /* ==================== ABA 1: RENDERIZAÇÃO OPERACIONAL ==================== */
+    function renderOperationalView() {
+      const bSD = blk(false, 'SD');
+      const bSN = blk(false, 'SN');
+      const titleDate = new Date(st.ano, st.mes - 1, st.dia);
+      document.getElementById('selected-day-title').textContent = titleDate.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+      document.getElementById('selected-day-badge').textContent = dtxt();
+
+      document.getElementById('collab-text-SD').textContent = bSD?.colab || 'Não informado';
+      document.getElementById('collab-text-SN').textContent = bSN?.colab || 'Não informado';
+
+      const container = document.getElementById('categories-container');
+      container.innerHTML = '';
+
+      const filterText = nrm(document.getElementById('daily-quick-filter').value);
+      const filterSector = nrm(document.getElementById('daily-sector-filter').value);
+      const filterSectorShort = filterSector.replace(/^\d+\s*-\s*/, '');
+      const filterStatus = document.getElementById('daily-status-filter').value;
+
+      let totalAg = 0, totalRe = 0;
+      let kpiCounts = {};
+      SECS.forEach(s => kpiCounts[s[0]] = 0);
+
+      SECS.forEach(([sk, label, icon, labs]) => {
+        let items = [];
+        const shiftsToRead = st.shift === 'ALL' ? ['SD', 'SN'] : [st.shift];
+        shiftsToRead.forEach(t => {
+          const b = t === 'SD' ? bSD : bSN;
+          if (!b || !b.secs[sk]) return;
+          b.secs[sk].forEach((r, idx) => {
+            if (!vazia(r)) items.push({ r, turno: t, idx });
+          });
+        });
+
+        if (filterStatus) items = items.filter(({ r }) => r.s === filterStatus);
+
+        if (filterSector) {
+          items = items.filter(({ r }) => {
+            const leitoTxt = nrm(sk === 'tin' ? `${r.v[2] || ''} ${r.v[3] || ''}` : (r.v[1] || ''));
+            return leitoTxt.includes(filterSector) || (filterSectorShort && leitoTxt.includes(filterSectorShort));
+          });
+        }
+
+        if (filterText) {
+          items = items.filter(({ r }) => nrm(`${(r.v || []).join(' ')} ${famTxt(r.f)}`).includes(filterText));
+        }
+
+        kpiCounts[sk] = items.length;
+        items.forEach(({ r }) => { if (r.s === 'a') totalAg++; else totalRe++; });
+
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden";
+
+        let tableRows = items.map(({ r, turno, idx }) => {
+          const isAg = r.s === 'a';
+          const badgeClass = isAg ? 'status-agendado' : 'status-realizado';
+          const statusText = isAg ? 'Agendada' : 'Realizada';
+          const aguardandoExame = (sk === 'exa' && r.v[2] && !r.v[3]);
+
+          let leitoCol = r.v[1] || '—';
+          let detalhes = '';
+          if (sk === 'tin') {
+            leitoCol = `${r.v[2] || '—'} → ${r.v[3] || '—'}`;
+            detalhes = r.v[1] ? `Horário: ${r.v[1]}` : '';
+          } else if (sk === 'exa') {
+            detalhes = `${r.v[2] ? 'Saída: ' + r.v[2] : ''} ${r.v[3] ? '| Retorno: ' + r.v[3] : ''} ${r.v[4] ? '| ' + r.v[4] : ''}`.trim();
+          } else if (sk === 'tex') {
+            detalhes = `${r.v[2] ? r.v[2] + ' | ' : ''}${r.v[3] ? 'Destino: ' + r.v[3] : ''}`.trim();
+          } else if (sk === 'dem') {
+            detalhes = `${r.v[2] ? r.v[2] + ' | ' : ''}${r.v[3] || ''}`.trim();
+          } else {
+            detalhes = r.v[2] || '';
+          }
+
+          return `<tr class="border-b border-slate-100 text-xs hover:bg-slate-50 ${isAg ? 'row-agendado' : 'row-realizado'}">
+            <td class="p-2.5 font-semibold ${isAg ? 'text-red-600' : 'text-slate-800'}">
+              <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 mr-1">${turno}</span>
+              ${esc(r.v[0] || '—')}
+              ${aguardandoExame ? '<span class="ml-1.5 inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">⏳ Aguardando retorno</span>' : ''}
+            </td>
+            <td class="p-2.5 text-slate-600 font-medium">${esc(leitoCol)}</td>
+            <td class="p-2.5 text-slate-600">${esc(detalhes || '—')}</td>
+            <td class="p-2.5 text-slate-500 text-[11px]">${esc(famTxt(r.f) || '—')}</td>
+            <td class="p-2.5 text-center">
+              <button onclick="toggleRecordStatus('${turno}','${sk}',${idx})" title="Clique para alternar Agendada / Realizada" class="px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition hover:opacity-85 ${badgeClass}">${statusText}</button>
+            </td>
+            <td class="p-2.5 text-right whitespace-nowrap no-print">
+              <button onclick="openPatientHistory('${esc(r.v[0] || '')}')" class="text-slate-500 hover:text-teal-600 p-1 rounded" title="Histórico completo do paciente"><i data-lucide="user-search" class="w-3.5 h-3.5"></i></button>
+              <button onclick="openEditModal('${turno}','${sk}',${idx})" class="text-slate-500 hover:text-sky-600 p-1 rounded" title="Editar"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+              <button onclick="deleteRecord('${turno}','${sk}',${idx})" class="text-slate-500 hover:text-red-600 p-1 rounded" title="Excluir"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </td>
+          </tr>`;
+        }).join('');
+
+        card.innerHTML = `
+          <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <div class="flex items-center gap-2">
+              <i data-lucide="${icon}" class="w-4 h-4 text-sky-600"></i>
+              <h3 class="text-sm font-bold text-slate-800">${label}</h3>
+              <span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full">${items.length}</span>
             </div>
-          </label>`;
-        }).join('')}</div>
-        <div class="fm">
-          <div class="fh">Familiares / contatos</div>
-          ${x.f.map((f,n)=>`<div class="fr" data-fi="${n}">
-            <select data-fk="p" aria-label="Parentesco"><option value="">Parentesco…</option>${PAR.map(p=>`<option${p===f.p?' selected':''}>${p}</option>`).join('')}</select>
-            <input data-fk="n" placeholder="Nome do familiar" value="${esc(f.n)}">
-            <input data-fk="c" placeholder="CPF" inputmode="numeric" value="${esc(f.c)}">
-            <input data-fk="t" type="tel" placeholder="Telefone" value="${esc(f.t)}">
-            <button class="x" data-act="delf" title="Remover familiar">✕</button>
-          </div>`).join('')}
-          <button data-act="addf">+ Familiar</button>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="event.stopPropagation();openModalWithCategory('${sk}')" class="text-[11px] font-bold text-sky-600 hover:text-sky-800 bg-white border border-slate-200 px-2 py-0.5 rounded-md">+ Adicionar</button>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead class="bg-white border-b border-slate-100 text-[10px] uppercase text-slate-400 tracking-wider">
+                <tr>
+                  <th class="p-2.5 font-semibold">Turno / Paciente</th>
+                  <th class="p-2.5 font-semibold">Setor / Leito</th>
+                  <th class="p-2.5 font-semibold">Detalhes</th>
+                  <th class="p-2.5 font-semibold">Familiares / Contato</th>
+                  <th class="p-2.5 font-semibold text-center">Status</th>
+                  <th class="p-2.5 font-semibold text-right no-print">Ações</th>
+                </tr>
+              </thead>
+              <tbody>${tableRows || '<tr><td colspan="6" class="p-4 text-center text-slate-400 text-xs">Nenhum registro.</td></tr>'}</tbody>
+            </table>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('day-status-summary').innerHTML = `<span class="text-red-600 font-bold">${totalAg} agendada(s)</span> • <span class="text-slate-800 font-bold">${totalRe} realizada(s)</span>`;
+
+      document.getElementById('daily-kpi-grid').innerHTML = SECS.map(([sk, label]) => `
+        <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <span class="text-[10px] font-bold uppercase text-slate-400 leading-tight">${label}</span>
+          <span class="text-xl font-extrabold text-slate-800 mt-1">${kpiCounts[sk]}</span>
         </div>
-      </div>`;
-    });
-    s.innerHTML=h;box.appendChild(s);
-  });
-}
+      `).join('');
 
-$('#secs').oninput=e=>{
-  const t=e.target,rc=t.closest('.rec');if(!rc)return;
-  const x=blk(true).secs[rc.dataset.k][+rc.dataset.i];
-  if(t.dataset.j!==undefined){
-    x.v[+t.dataset.j]=t.value;
-    if(+t.dataset.j===0) refreshPatientDatalist();
-  } else if(t.dataset.fk){
-    let v=t.value;
-    if(t.dataset.fk==='c'){v=mcpf(v);t.value=v}
-    if(t.dataset.fk==='t'){v=mtel(v);t.value=v}
-    x.f[+t.closest('.fr').dataset.fi][t.dataset.fk]=v;
-  }
-  save();
-};
+      refreshIcons();
+    }
 
-$('#secs').onclick=e=>{
-  const ad=e.target.closest('[data-add]');
-  if(ad){
-    const k=ad.dataset.add;
-    blk(true).secs[k].push({v:Array(SECS.find(s=>s[0]===k)[2].length).fill(''),s:'a',f:[NF()]});
-    save();render();
-    const l=document.querySelectorAll(`.rec[data-k="${k}"]`);
-    if(l.length) l[l.length-1].querySelector('input').focus();
-    return;
-  }
-  const bt=e.target.closest('[data-act]'),rc=e.target.closest('.rec');if(!bt||!rc)return;
-  const k=rc.dataset.k,rows=blk(true).secs[k],i=+rc.dataset.i,x=rows[i],a=bt.dataset.act;
-  if(a==='hist'){
-    if(!nrm(x.v[0]))return toast('Preencha o nome do paciente primeiro');
-    st.pq=x.v[0].trim();st.pk=nrm(x.v[0]);st.v='pac';render();return;
-  }
-  if(a==='s') x.s=bt.dataset.v;
-  else if(a==='now'){ x.v[+bt.dataset.j]=nowHHMM(); }
-  else if(a==='autofill'){
-    const key=nrm(x.v[0]);
-    if(!key){toast('Digite ou selecione o nome do paciente primeiro.');return}
-    const found=getPatientsOfDay().find(p=>nrm(p.nome)===key);
-    if(!found){toast('Paciente não encontrado em outros registros de hoje.');return}
-    if(k==='tin'){ if(!x.v[3]) x.v[3]=found.leito; if(!x.v[2]) x.v[2]=found.leito; }
-    else if(x.v.length>1 && !x.v[1]){ x.v[1]=found.leito; }
-    if(found.fams && found.fams.length){ x.f=JSON.parse(JSON.stringify(found.fams)); }
-    toast('Dados do paciente preenchidos ✔');
-  }
-  else if(a==='del'){if(!confirm('Excluir este registro?'))return;rows.splice(i,1)}
-  else if(a==='addf') x.f.push(NF());
-  else if(a==='delf') x.f.splice(+bt.closest('.fr').dataset.fi,1);
-  save();render();
-};
+    function pullPendingFromPrevShift() {
+      const targetTurno = st.shift === 'SN' ? 'SN' : 'SD';
+      let prevAno = st.ano, prevMes = st.mes, prevDia = st.dia, prevTurno = 'SD';
+      if (targetTurno === 'SN') {
+        prevTurno = 'SD';
+      } else {
+        prevTurno = 'SN';
+        const dt = new Date(st.ano, st.mes - 1, st.dia - 1);
+        prevAno = dt.getFullYear();
+        prevMes = dt.getMonth() + 1;
+        prevDia = dt.getDate();
+      }
+      const prevBlk = blk(false, prevTurno, prevDia, mk(prevAno, prevMes));
+      if (!prevBlk || !prevBlk.secs) {
+        toast('Nenhuma pendência encontrada no turno anterior.');
+        return;
+      }
+      let copiados = 0;
+      const curBlk = blk(true, targetTurno);
+      SECS.forEach(([sk]) => {
+        (prevBlk.secs[sk] || []).forEach(r => {
+          if (r.s === 'a' && !vazia(r)) {
+            const dup = curBlk.secs[sk].some(c => nrm(c.v[0]) === nrm(r.v[0]) && (c.v[2] || '') === (r.v[2] || ''));
+            if (!dup) {
+              curBlk.secs[sk].push(JSON.parse(JSON.stringify(r)));
+              copiados++;
+            }
+          }
+        });
+      });
+      if (copiados) {
+        save();
+        renderAll();
+        toast(`${copiados} demanda(s) agendada(s) puxada(s) para ${targetTurno} ✔`);
+      } else {
+        toast('Nenhuma nova pendência agendada no turno anterior.');
+      }
+    }
 
-$('#bPullPend').onclick=()=>{
-  let prevAno=st.ano,prevMes=st.mes,prevDia=st.dia,prevTurno='SD';
-  if(st.turno==='SN'){
-    prevTurno='SD';
-  } else {
-    prevTurno='SN';
-    const dt=new Date(st.ano,st.mes-1,st.dia-1);
-    prevAno=dt.getFullYear();prevMes=dt.getMonth()+1;prevDia=dt.getDate();
-  }
-  const prevBlk=((db[mk(prevAno,prevMes)]||{})[prevDia]||{})[prevTurno];
-  if(!prevBlk||!prevBlk.secs){toast('Nenhuma pendência encontrada no turno anterior.');return}
-  let copiados=0;
-  const curBlk=blk(true);
-  SECS.forEach(([k])=>{
-    (prevBlk.secs[k]||[]).forEach(r=>{
-      if(r.s==='a'){
-        const dup=curBlk.secs[k].some(c=>nrm(c.v[0])===nrm(r.v[0]) && c.v[2]===r.v[2]);
-        if(!dup){
-          curBlk.secs[k].push(JSON.parse(JSON.stringify(r)));
-          copiados++;
+    /* ==================== CRUD MODAL (DEMANDAS) ==================== */
+    function updateFormDynamicFields(vals = []) {
+      const cat = document.getElementById('form-category').value;
+      const sec = SECS.find(s => s[0] === cat);
+      const labs = sec ? sec[3].slice(1) : [];
+      const container = document.getElementById('dynamic-category-fields');
+
+      container.innerHTML = labs.map((lbl, idx) => {
+        const j = idx + 1;
+        const val = esc(vals[j] || '');
+        const isLeito = /leito|setor/i.test(lbl);
+        const isTime = /horário|saída|retorno/i.test(lbl) && cat !== 'adm';
+        return `<div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">${lbl}</label>
+          <div class="flex gap-1.5">
+            <input type="text" data-dyn-j="${j}" value="${val}" ${isLeito ? 'list="dl-setores"' : ''} class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 uppercase" placeholder="${isLeito ? 'Selecione o setor e digite o leito' : ''}">
+            ${isTime ? `<button type="button" onclick="this.previousElementSibling.value='${nowHHMM()}'" class="px-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl text-xs" title="Hora atual">🕒</button>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderModalFamilies(fams = [NF()]) {
+      const list = document.getElementById('modal-family-list');
+      if (!fams || !fams.length) fams = [NF()];
+      list.innerHTML = fams.map(f => `
+        <div class="modal-fam-row grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-50 p-2 rounded-xl border border-slate-200">
+          <select class="fam-p sm:col-span-3 text-xs bg-white border border-slate-300 rounded-lg px-2 py-2">
+            <option value="">Parentesco…</option>
+            ${PAR.map(p => `<option value="${p}" ${p === f.p ? 'selected' : ''}>${p}</option>`).join('')}
+          </select>
+          <input type="text" class="fam-n sm:col-span-4 text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-2 uppercase" placeholder="Nome do familiar" value="${esc(f.n)}">
+          <input type="text" oninput="this.value=mcpf(this.value)" class="fam-c sm:col-span-2 text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-2" placeholder="CPF" value="${esc(f.c)}">
+          <input type="tel" oninput="this.value=mtel(this.value)" class="fam-t sm:col-span-2 text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-2" placeholder="Telefone" value="${esc(f.t)}">
+          <button type="button" onclick="this.closest('.modal-fam-row').remove()" class="sm:col-span-1 text-slate-400 hover:text-red-600 p-1 text-center font-bold" title="Remover">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function addModalFamilyRow() {
+      const list = document.getElementById('modal-family-list');
+      const div = document.createElement('div');
+      div.className = "modal-fam-row grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-50 p-2 rounded-xl border border-slate-200";
+      div.innerHTML = `
+        <select class="fam-p sm:col-span-3 text-xs bg-white border border-slate-300 rounded-lg px-2 py-2">
+          <option value="">Parentesco…</option>
+          ${PAR.map(p => `<option value="${p}">${p}</option>`).join('')}
+        </select>
+        <input type="text" class="fam-n sm:col-span-4 text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-2 uppercase" placeholder="Nome do familiar">
+        <input type="text" oninput="this.value=mcpf(this.value)" class="fam-c sm:col-span-2 text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-2" placeholder="CPF">
+        <input type="tel" oninput="this.value=mtel(this.value)" class="fam-t sm:col-span-2 text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-2" placeholder="Telefone">
+        <button type="button" onclick="this.closest('.modal-fam-row').remove()" class="sm:col-span-1 text-slate-400 hover:text-red-600 p-1 text-center font-bold">✕</button>
+      `;
+      list.appendChild(div);
+    }
+
+    function autofillModalPatient() {
+      const pacName = document.getElementById('form-paciente').value;
+      const key = nrm(pacName);
+      if (!key) { toast('Digite ou selecione o nome do paciente primeiro.'); return; }
+      const dayNum = +document.getElementById('form-day').value;
+      const found = getPatientsOfDay(dayNum).find(p => nrm(p.nome) === key);
+      if (!found) { toast('Paciente não encontrado em outros registros deste dia.'); return; }
+
+      const cat = document.getElementById('form-category').value;
+      if (cat === 'tin') {
+        const inpOrig = document.querySelector('[data-dyn-j="2"]');
+        const inpDest = document.querySelector('[data-dyn-j="3"]');
+        if (inpOrig && !inpOrig.value) inpOrig.value = found.leito;
+        if (inpDest && !inpDest.value) inpDest.value = found.leito;
+      } else {
+        const inpLeito = document.querySelector('[data-dyn-j="1"]');
+        if (inpLeito && !inpLeito.value) inpLeito.value = found.leito;
+      }
+      if (found.fams && found.fams.length) renderModalFamilies(found.fams);
+      toast('Dados do paciente preenchidos ✔');
+    }
+
+    function openModal() {
+      openModalWithCategory('adm');
+    }
+
+    function openModalWithCategory(catId) {
+      document.getElementById('crud-modal-title').textContent = 'Nova Demanda Hospitalar';
+      document.getElementById('form-edit-mode').value = 'create';
+      document.getElementById('form-day').value = String(st.dia);
+      document.getElementById('form-turno').value = st.shift === 'SN' ? 'SN' : 'SD';
+      document.getElementById('form-category').value = catId;
+      document.getElementById('form-paciente').value = '';
+      updateFormDynamicFields([]);
+      renderModalFamilies([NF()]);
+      document.querySelector('input[name="form-status"][value="a"]').checked = true;
+      document.getElementById('crud-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('form-paciente').focus(), 50);
+    }
+
+    function openEditModal(turno, catId, idx) {
+      const b = blk(false, turno);
+      const rec = b?.secs?.[catId]?.[idx];
+      if (!rec) return;
+
+      document.getElementById('crud-modal-title').textContent = 'Editar Demanda Hospitalar';
+      document.getElementById('form-edit-mode').value = 'edit';
+      document.getElementById('form-orig-day').value = String(st.dia);
+      document.getElementById('form-orig-turno').value = turno;
+      document.getElementById('form-orig-cat').value = catId;
+      document.getElementById('form-orig-idx').value = String(idx);
+
+      document.getElementById('form-day').value = String(st.dia);
+      document.getElementById('form-turno').value = turno;
+      document.getElementById('form-category').value = catId;
+      document.getElementById('form-paciente').value = rec.v[0] || '';
+      updateFormDynamicFields(rec.v);
+      renderModalFamilies(rec.f && rec.f.length ? rec.f : [NF()]);
+      const rad = document.querySelector(`input[name="form-status"][value="${rec.s === 'r' ? 'r' : 'a'}"]`);
+      if (rad) rad.checked = true;
+
+      document.getElementById('crud-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('crud-modal').classList.add('hidden');
+    }
+
+    function handleSaveRecord(e) {
+      e.preventDefault();
+      const mode = document.getElementById('form-edit-mode').value;
+      const dayNum = +document.getElementById('form-day').value;
+      const turno = document.getElementById('form-turno').value;
+      const cat = document.getElementById('form-category').value;
+      const pac = document.getElementById('form-paciente').value.trim().toUpperCase();
+      const status = document.querySelector('input[name="form-status"]:checked').value;
+
+      const secDef = SECS.find(s => s[0] === cat);
+      const vArr = Array(secDef[3].length).fill('');
+      vArr[0] = pac;
+      document.querySelectorAll('[data-dyn-j]').forEach(inp => {
+        const j = +inp.dataset.dynJ;
+        vArr[j] = inp.value.trim().toUpperCase();
+      });
+
+      const fams = [];
+      document.querySelectorAll('.modal-fam-row').forEach(row => {
+        const p = row.querySelector('.fam-p').value;
+        const n = row.querySelector('.fam-n').value.trim().toUpperCase();
+        const c = row.querySelector('.fam-c').value.trim();
+        const t = row.querySelector('.fam-t').value.trim();
+        if (p || n || c || t) fams.push({ p, n, c, t });
+      });
+
+      if (mode === 'edit') {
+        const oDay = +document.getElementById('form-orig-day').value;
+        const oTurno = document.getElementById('form-orig-turno').value;
+        const oCat = document.getElementById('form-orig-cat').value;
+        const oIdx = +document.getElementById('form-orig-idx').value;
+        const oBlk = blk(false, oTurno, oDay);
+        if (oBlk && oBlk.secs[oCat]) oBlk.secs[oCat].splice(oIdx, 1);
+      }
+
+      const targetBlk = blk(true, turno, dayNum);
+      targetBlk.secs[cat].push({ v: vArr, s: status, f: fams });
+      save();
+      closeModal();
+      toast(mode === 'edit' ? 'Registro atualizado ✔' : 'Registro salvo com sucesso ✔');
+      renderAll();
+    }
+
+    function toggleRecordStatus(turno, catId, idx) {
+      const rec = blk(false, turno)?.secs?.[catId]?.[idx];
+      if (!rec) return;
+      rec.s = rec.s === 'a' ? 'r' : 'a';
+      save();
+      renderAll();
+    }
+
+    function deleteRecord(turno, catId, idx) {
+      if (!confirm('Deseja excluir este registro?')) return;
+      blk(false, turno)?.secs?.[catId]?.splice(idx, 1);
+      save();
+      toast('Registro excluído.');
+      renderAll();
+    }
+
+    /* ==================== COLABORADORES ==================== */
+    function editCollaborators(shift) {
+      document.getElementById('collab-turno-input').value = shift;
+      document.getElementById('collab-names-input').value = blk(false, shift)?.colab || '';
+      document.getElementById('collab-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('collab-names-input').focus(), 50);
+    }
+    function closeCollabModal() { document.getElementById('collab-modal').classList.add('hidden'); }
+    function saveCollaborators(e) {
+      e.preventDefault();
+      const shift = document.getElementById('collab-turno-input').value;
+      const val = document.getElementById('collab-names-input').value.trim().toUpperCase();
+      blk(true, shift).colab = val;
+      save();
+      closeCollabModal();
+      renderAll();
+      toast('Equipe atualizada ✔');
+    }
+
+    /* ==================== ABA 2: CONTROLE DE VISITAS ==================== */
+    function renderVisitasView() {
+      document.getElementById('tit-visitas').textContent = `Controle de Visitas — Dia ${dtxt()}`;
+      const list = visList(false);
+      let totalVis = 0, emCurso = 0;
+      list.forEach(p => (p.v || []).forEach(v => {
+        if (!v.n) return;
+        totalVis++;
+        if (v.in && !v.out) emCurso++;
+      }));
+      document.getElementById('kpi-visitas').innerHTML = `<b>${list.length}</b> paciente(s) • <b>${totalVis}</b> visitante(s) • <span class="text-amber-700 font-bold">${emCurso} no leito agora</span>`;
+
+      const container = document.getElementById('visitas-list-container');
+      if (!list.length) {
+        container.innerHTML = `<div class="bg-white rounded-2xl p-6 border border-slate-200/80 text-center text-xs text-slate-500">
+          Nenhum registro de visita neste dia. Clique em <b>+ Novo Paciente / Visita</b> ou <b>Importar pacientes do dia</b>.
+        </div>`;
+        return;
+      }
+
+      const q = nrm(document.getElementById('vis-quick-filter').value);
+      const sVis = nrm(document.getElementById('vis-sector-filter').value);
+      const sVisNome = sVis.replace(/^\d+\s*-\s*/, '');
+      let html = '';
+
+      list.forEach((p, pi) => {
+        const leitoNrm = nrm(p.leito);
+        if (sVis && !leitoNrm.includes(sVis) && !leitoNrm.includes(sVisNome)) return;
+        const blob = nrm([p.pac, p.leito, p.obs, ...(p.v || []).map(v => `${v.n} ${v.p} ${v.c} ${v.cracha} ${v.in && !v.out ? 'em andamento' : ''}`)].join(' '));
+        if (q && !blob.includes(q)) return;
+
+        const ativos = (p.v || []).filter(v => v.n && v.in && !v.out).length;
+        html += `<div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+          <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-extrabold text-slate-700">PACIENTE #${pi + 1}</span>
+              ${ativos ? `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">${ativos} visitante(s) no leito</span>` : '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800">Sem visitante ativo</span>'}
+            </div>
+            <div class="flex items-center gap-2 no-print">
+              <button type="button" onclick="openPatientHistory('${esc(p.pac)}')" class="text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-2.5 py-1 rounded-lg">🧑‍⚕️ Histórico</button>
+              <button type="button" onclick="deleteVisitPatient(${pi})" class="text-xs font-semibold text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg">✕ Excluir</button>
+            </div>
+          </div>
+
+          <div class="p-4 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              <div class="sm:col-span-5">
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Nome do Paciente</label>
+                <input type="text" list="dl-pacientes-dia" value="${esc(p.pac)}" oninput="updateVisitPatientField(${pi},'pac',this.value)" placeholder="Nome do paciente internado" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 uppercase font-semibold">
+              </div>
+              <div class="sm:col-span-3">
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Setor / Leito</label>
+                <input type="text" list="dl-setores" value="${esc(p.leito)}" oninput="updateVisitPatientField(${pi},'leito',this.value)" placeholder="Ex.: 005 - UTI 1 - L.10" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 uppercase">
+              </div>
+              <div class="sm:col-span-4">
+                <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Observação / Restrição</label>
+                <input type="text" value="${esc(p.obs || '')}" oninput="updateVisitPatientField(${pi},'obs',this.value)" placeholder="Ex.: Visita 15h-16h / Isolamento" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-xl px-3 py-2">
+              </div>
+            </div>
+
+            <div class="border-t border-dashed border-slate-200 pt-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase text-slate-500">Visitantes Registrados (${(p.v || []).length})</span>
+                <button type="button" onclick="addVisitorRow(${pi})" class="text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-2.5 py-1 rounded-lg no-print">+ Adicionar Visitante</button>
+              </div>
+              <div class="space-y-2">
+                ${(p.v || []).map((v, vi) => `
+                  <div class="grid grid-cols-1 lg:grid-cols-12 gap-2 items-center bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <input type="text" value="${esc(v.n)}" oninput="updateVisitorField(${pi},${vi},'n',this.value)" placeholder="Nome completo do visitante" class="lg:col-span-3 text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-2 uppercase">
+                    <select onchange="updateVisitorField(${pi},${vi},'p',this.value)" class="lg:col-span-2 text-xs bg-white border border-slate-300 rounded-lg px-2 py-2">
+                      <option value="">Parentesco…</option>
+                      ${PAR.map(pr => `<option value="${pr}" ${pr === v.p ? 'selected' : ''}>${pr}</option>`).join('')}
+                    </select>
+                    <input type="text" value="${esc(v.c)}" oninput="this.value=mcpf(this.value);updateVisitorField(${pi},${vi},'c',this.value)" placeholder="CPF / Doc" class="lg:col-span-2 text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-2">
+                    <input type="text" value="${esc(v.cracha || v.t || '')}" oninput="updateVisitorField(${pi},${vi},'cracha',this.value)" placeholder="Crachá / Tel" class="lg:col-span-1 text-xs bg-white border border-slate-300 rounded-lg px-2 py-2">
+                    <div class="lg:col-span-2 flex gap-1">
+                      <input type="text" value="${esc(v.in)}" oninput="updateVisitorField(${pi},${vi},'in',this.value)" placeholder="Entrada" class="w-full text-xs bg-white border border-slate-300 rounded-lg px-2 py-2">
+                      <button type="button" onclick="stampVisitorTime(${pi},${vi},'in')" class="px-2 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg text-xs no-print" title="Registrar entrada agora">🕒</button>
+                    </div>
+                    <div class="lg:col-span-2 flex gap-1 items-center">
+                      <input type="text" value="${esc(v.out)}" oninput="updateVisitorField(${pi},${vi},'out',this.value)" placeholder="Saída" class="w-full text-xs bg-white border border-slate-300 rounded-lg px-2 py-2">
+                      <button type="button" onclick="stampVisitorTime(${pi},${vi},'out')" class="px-2 py-2 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg text-xs no-print" title="Registrar saída agora">🕒</button>
+                      <button type="button" onclick="deleteVisitorRow(${pi},${vi})" class="text-slate-400 hover:text-red-600 px-1.5 font-bold no-print" title="Remover">✕</button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>`;
+      });
+
+      container.innerHTML = html || `<div class="bg-white rounded-2xl p-6 border border-slate-200/80 text-center text-xs text-slate-500">Nenhuma visita corresponde ao filtro.</div>`;
+    }
+
+    function addVisitPatient() {
+      visList(true).push({ pac: '', leito: '', obs: '', v: [NV()] });
+      save();
+      renderAll();
+    }
+
+    function pullPatientsToVisits() {
+      const pacs = getPatientsOfDay();
+      if (!pacs.length) { toast('Nenhum paciente registrado nos turnos SD/SN hoje.'); return; }
+      const list = visList(true);
+      let add = 0;
+      pacs.forEach(p => {
+        if (!list.some(x => nrm(x.pac) === nrm(p.nome))) {
+          list.push({ pac: p.nome, leito: p.leito, obs: '', v: [NV()] });
+          add++;
+        }
+      });
+      if (add) {
+        save();
+        renderAll();
+        toast(`${add} paciente(s) importado(s) para controle de visitas ✔`);
+      } else {
+        toast('Todos os pacientes do dia já estão na lista de visitas.');
+      }
+    }
+
+    function updateVisitPatientField(pi, field, val) {
+      const p = visList(true)[pi];
+      if (!p) return;
+      p[field] = field === 'pac' || field === 'leito' ? val.toUpperCase() : val;
+      if (field === 'pac') {
+        refreshPatientDatalist();
+        const found = getPatientsOfDay().find(x => nrm(x.nome) === nrm(val));
+        if (found && found.leito && !p.leito) {
+          p.leito = found.leito;
+          renderVisitasView();
         }
       }
-    });
-  });
-  if(copiados){save();render();toast(`${copiados} demanda(s) agendada(s) importada(s) ✔`)}
-  else toast('Nenhuma nova pendência agendada no turno anterior.');
-};
-
-function renderVis(){
-  $('#titVis').textContent=`CONTROLE DE VISITAS — DIA ${dtxt()}`;
-  const list=visList(false);
-  let totalVis=0,emCurso=0;
-  list.forEach(p=>(p.v||[]).forEach(v=>{if(!v.n)return;totalVis++;if(v.in && !v.out)emCurso++}));
-  $('#kpiVis').innerHTML=`<b>${list.length}</b> paciente(s) · <b>${totalVis}</b> visitante(s) · <span class="badge-warn">${emCurso} no leito agora</span>`;
-  $('#fltVis').value=st.fltVis;
-
-  const box=$('#visList');
-  if(!list.length){
-    box.innerHTML='<div class="sec"><div class="empty">Nenhum registro de visita neste dia. Clique em <b>+ Novo Paciente / Visita</b> ou <b>📋 Importar pacientes do dia</b>.</div></div>';
-    return;
-  }
-
-  $('#fltSetorVis').value=st.fltSetorVis;
-  const q=nrm(st.fltVis);
-  const sVis=nrm(st.fltSetorVis);
-  const sVisNome=sVis.replace(/^\d+\s*-\s*/,'');
-  let h='';
-  list.forEach((p,pi)=>{
-    const leitoNrm=nrm(p.leito);
-    if(sVis && !leitoNrm.includes(sVis) && !leitoNrm.includes(sVisNome)) return;
-    const blob=nrm([p.pac,p.leito,p.obs,...(p.v||[]).map(v=>`${v.n} ${v.p} ${v.c} ${v.cracha} ${v.in&&!v.out?'em andamento':''}`)].join(' '));
-    if(q && !blob.includes(q)) return;
-    const ativos=(p.v||[]).filter(v=>v.n && v.in && !v.out).length;
-    h+=`<div class="sec" data-pi="${pi}">
-      <h2>
-        <span>PACIENTE #${pi+1}</span>
-        ${ativos?`<span class="badge-warn">${ativos} visitante(s) no leito</span>`:'<span class="badge-ok">Sem visitante ativo</span>'}
-        <button data-vact="histp" title="Ver histórico completo deste paciente">🧑‍⚕️ Histórico</button>
-        <button class="x" data-vact="delp" style="margin-left:auto">✕ Excluir paciente</button>
-      </h2>
-      <div style="padding:10px">
-        <div class="g">
-          <label class="w">Nome do Paciente<input data-pf="pac" list="dl-pacientes-dia" value="${esc(p.pac)}" placeholder="Nome do paciente internado"></label>
-          <label>Leito / Setor<input data-pf="leito" list="dl-leitos" value="${esc(p.leito)}" placeholder="Ex.: 005 - UTI 1 / L.10"></label>
-          <label>Observação / Restrição<input data-pf="obs" value="${esc(p.obs||'')}" placeholder="Ex.: Visita autorizada 15h-16h / Isolamento"></label>
-        </div>
-        <div class="fm">
-          <div class="fh">Visitantes registrados (${(p.v||[]).length})</div>
-          ${(p.v||[]).map((v,vi)=>`<div class="vr" data-vi="${vi}">
-            <input data-vf="n" placeholder="Nome completo do visitante" value="${esc(v.n)}">
-            <select data-vf="p"><option value="">Parentesco…</option>${PAR.map(pr=>`<option${pr===v.p?' selected':''}>${pr}</option>`).join('')}</select>
-            <input data-vf="c" placeholder="CPF / Doc" inputmode="numeric" value="${esc(v.c)}">
-            <input data-vf="cracha" placeholder="Crachá / Tel" value="${esc(v.cracha||v.t||'')}">
-            <div class="in-row"><input data-vf="in" placeholder="Entrada" value="${esc(v.in)}"><button type="button" class="now-btn" data-vact="vin" title="Registrar entrada agora">🕒</button></div>
-            <div class="in-row"><input data-vf="out" placeholder="Saída" value="${esc(v.out)}"><button type="button" class="now-btn" data-vact="vout" title="Registrar saída agora">🕒</button></div>
-            <button class="x" data-vact="delv" title="Remover visitante">✕</button>
-          </div>`).join('')}
-          <button type="button" data-vact="addv" style="margin-top:4px">+ Adicionar Visitante</button>
-        </div>
-      </div>
-    </div>`;
-  });
-  box.innerHTML=h||'<div class="sec"><div class="empty">Nenhuma visita corresponde ao filtro.</div></div>';
-}
-
-$('#fltVis').oninput=e=>{st.fltVis=e.target.value;renderVis()};
-$('#fltSetorVis').onchange=e=>{st.fltSetorVis=e.target.value;renderVis()};
-$('#fltSetorOp').onchange=e=>{st.fltSetorOp=e.target.value;renderOp()};
-$('#bAddVis').onclick=()=>{
-  visList(true).push({pac:'',leito:'',obs:'',v:[NV()]});
-  save();render();
-  const ins=document.querySelectorAll('#visList input[data-pf="pac"]');
-  if(ins.length) ins[ins.length-1].focus();
-};
-
-$('#bPullPacVis').onclick=()=>{
-  const pacs=getPatientsOfDay();
-  if(!pacs.length){toast('Nenhum paciente registrado nos turnos SD/SN hoje.');return}
-  const list=visList(true);
-  let add=0;
-  pacs.forEach(p=>{
-    if(!list.some(x=>nrm(x.pac)===nrm(p.nome))){
-      list.push({pac:p.nome,leito:p.leito,obs:'',v:[NV()]});
-      add++;
+      save();
     }
-  });
-  if(add){save();render();toast(`${add} paciente(s) importado(s) para controle de visitas ✔`)}
-  else toast('Todos os pacientes do dia já estão na lista de visitas.');
-};
 
-$('#visList').oninput=e=>{
-  const t=e.target,sec=t.closest('[data-pi]');if(!sec)return;
-  const p=visList(true)[+sec.dataset.pi];
-  if(t.dataset.pf){
-    p[t.dataset.pf]=t.value;
-    if(t.dataset.pf==='pac'){
-      refreshPatientDatalist();
-      const found=getPatientsOfDay().find(x=>nrm(x.nome)===nrm(t.value));
-      if(found && found.leito && !p.leito){ p.leito=found.leito; renderVis(); }
+    function deleteVisitPatient(pi) {
+      if (!confirm('Excluir este paciente e suas visitas?')) return;
+      visList(true).splice(pi, 1);
+      save();
+      renderAll();
     }
-  } else if(t.dataset.vf){
-    const v=p.v[+t.closest('[data-vi]').dataset.vi];
-    let val=t.value;
-    if(t.dataset.vf==='c'){val=mcpf(val);t.value=val}
-    v[t.dataset.vf]=val;
-  }
-  save();
-};
 
-$('#visList').onclick=e=>{
-  const bt=e.target.closest('[data-vact]'),sec=e.target.closest('[data-pi]');if(!bt||!sec)return;
-  const list=visList(true),pi=+sec.dataset.pi,p=list[pi],act=bt.dataset.vact;
-  if(act==='histp'){
-    if(!nrm(p.pac))return toast('Preencha o nome do paciente primeiro');
-    st.pq=p.pac.trim();st.pk=nrm(p.pac);st.v='pac';render();return;
-  }
-  if(act==='delp'){if(!confirm('Excluir este paciente e suas visitas?'))return;list.splice(pi,1)}
-  else if(act==='addv'){p.v.push(NV())}
-  else if(act==='delv'){p.v.splice(+bt.closest('[data-vi]').dataset.vi,1)}
-  else if(act==='vin'){p.v[+bt.closest('[data-vi]').dataset.vi].in=nowHHMM()}
-  else if(act==='vout'){p.v[+bt.closest('[data-vi]').dataset.vi].out=nowHHMM()}
-  save();render();
-};
-
-function renderDash(){
-  const m=db[mk()]||{};let tot=0,ag=0,re=0,dias=0,visTot=0;const cat={},sh={SD:0,SN:0},vol=[],col={};
-  SECS.forEach(s=>cat[s[0]]=0);
-  for(let d=1;d<=nd(st.ano,st.mes);d++){
-    let c=0;
-    const dayObj=m[d]||{};
-    visTot+=cntVis(d);
-    ['SD','SN'].forEach(t=>{
-      const b=dayObj[t];if(!b)return;
-      const n=cnt(b);c+=n;sh[t]+=n;
-      for(const [k,rows] of Object.entries(b.secs||{})){
-        const valid=rows.filter(r=>!vazia(r));
-        cat[k]+=valid.length;
-        valid.forEach(r=>r.s==='a'?ag++:re++);
-      }
-      if(n||b.colab)(b.colab||'').toUpperCase().split(/\s*(?:\/|,|;|&|\+|\sE\s|\s-\s)\s*/).map(x=>x.replace(/\(.*?\)|\bSD\b|\bSN\b/g,'').trim()).filter(Boolean).forEach(x=>col[x]=(col[x]||0)+1);
-    });
-    vol.push(c);tot+=c;if(c||cntVis(d))dias++;
-  }
-  const bar=(l,v,mx)=>`<div class="br"><span>${esc(l)}</span><i style="width:${mx?v/mx*100:0}%"></i><b>${v}</b></div>`;
-  const mv=Math.max(...vol,1),mc=Math.max(...Object.values(cat),1),cl=Object.entries(col).sort((a,b)=>b[1]-a[1]);
-  $('#v-dash').innerHTML=`<h3 style="margin-top:0">${MESES[st.mes-1]} de ${st.ano}</h3><div class="kp"><div>Total de registros<b>${tot}</b></div><div>Agendadas<b class="r">${ag}</b></div><div>Realizadas<b>${re}</b></div><div>Visitas registradas<b>${visTot}</b></div><div>Dias com registro<b>${dias}</b></div></div>
-  <div class="cols"><div class="cd"><h3>Registros por categoria</h3>${SECS.map(s=>bar(s[1],cat[s[0]],mc)).join('')}</div>
-  <div class="cd"><h3>Diurno × Noturno</h3>${bar('Diurno (SD)',sh.SD,Math.max(sh.SD,sh.SN,1))}${bar('Noturno (SN)',sh.SN,Math.max(sh.SD,sh.SN,1))}<h3 style="margin-top:14px">Plantões por colaborador</h3>${cl.map(([n,v])=>bar(n,v,cl[0][1])).join('')||'<span class="tip">Sem colaboradores informados.</span>'}</div>
-  <div class="cd" style="grid-column:1/-1"><h3>Volume diário</h3><div class="vol">${vol.map((v,i)=>`<i style="height:${v/mv*100}%" title="Dia ${i+1}: ${v}"></i>`).join('')}</div><div class="vl">${vol.map((v,i)=>`<span>${i+1}</span>`).join('')}</div></div></div>`;
-}
-
-function renderPl(){
-  let h=`<div class="bar"><button class="on" id="bCopyWa">📋 Copiar resumo para WhatsApp</button></div>`,any=false;
-  ['SD','SN'].forEach(t=>{
-    const b=blk(false,t);if(!b||(!cnt(b)&&!b.colab))return;any=true;
-    h+=`<div class="pl"><h3>RELATÓRIO COMPARTILHADO — DIA ${dtxt()} — TURNO ${t}</h3><div class="tip">Colaboradores: <b>${esc(b.colab)||'—'}</b> · <span class="r">vermelho = agendada</span></div>`;
-    SECS.forEach(([k,n,labs])=>{
-      const rows=b.secs[k].filter(r=>!vazia(r));if(!rows.length)return;
-      h+=`<h4>${n}</h4><table><tr>${labs.map(l=>`<th>${l}</th>`).join('')}<th>Familiares / contato</th></tr>${rows.map(r=>`<tr class="${r.s}">${labs.map((l,j)=>`<td>${esc(r.v[j])}</td>`).join('')}<td>${esc(famTxt(r.f))}</td></tr>`).join('')}</table>`;
-    });
-    h+='</div>';
-  });
-  const vis=visList(false);
-  if(vis.length){
-    any=true;
-    h+=`<div class="pl"><h3>CONTROLE DE VISITAS — DIA ${dtxt()}</h3><table><tr><th>Paciente</th><th>Leito</th><th>Observação</th><th>Visitantes (Entrada / Saída)</th></tr>${vis.map(p=>`<tr><td>${esc(p.pac)}</td><td>${esc(p.leito)}</td><td>${esc(p.obs||'')}</td><td>${esc(visTxt(p.v))}</td></tr>`).join('')}</table></div>`;
-  }
-  $('#v-pl').innerHTML=any?h:`<div class="empty">Sem registros em ${dtxt()}.</div>`;
-  const btnWa=$('#bCopyWa');
-  if(btnWa) btnWa.onclick=copyWhatsApp;
-}
-
-function copyWhatsApp(){
-  let out=[`*RELATÓRIO RECEPÇÃO — ${dtxt()}*`];
-  ['SD','SN'].forEach(t=>{
-    const b=blk(false,t);if(!b||(!cnt(b)&&!b.colab))return;
-    out.push(`\n*TURNO ${t}* (${b.colab||'Equipe não informada'})`);
-    SECS.forEach(([k,n])=>{
-      const rows=b.secs[k].filter(r=>!vazia(r));if(!rows.length)return;
-      out.push(`*${n}:*`);
-      rows.forEach(r=>{
-        const stTag=r.s==='a'?'[AGENDADA]':'[OK]';
-        out.push(`• ${stTag} ${r.v.filter(Boolean).join(' | ')}`);
-      });
-    });
-  });
-  const vis=visList(false);
-  if(vis.length){
-    out.push(`\n*VISITAS DO DIA (${vis.length} paciente(s)):*`);
-    vis.forEach(p=>out.push(`• ${p.pac} (${p.leito||'S/L'}): ${visTxt(p.v)||'Sem visitante'}`));
-  }
-  const txt=out.join('\n');
-  navigator.clipboard.writeText(txt).then(()=>toast('Resumo copiado para WhatsApp ✔')).catch(()=>prompt('Copie o texto abaixo:',txt));
-}
-
-/* ==================== PASTA DE BACKUP (File System Access API) ==================== */
-const IDB_NAME='sgrh_fs';
-const IDB_STORE='handles';
-let bkDirHandle=null;
-
-function idbOpen(){
-  return new Promise((res,rej)=>{
-    const r=indexedDB.open(IDB_NAME,1);
-    r.onupgradeneeded=()=>r.result.createObjectStore(IDB_STORE);
-    r.onsuccess=()=>res(r.result);
-    r.onerror=()=>rej(r.error);
-  });
-}
-async function idbGet(k){
-  try{const d=await idbOpen();return await new Promise((res,rej)=>{
-    const t=d.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(k);
-    t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error);
-  })}catch(e){return null}
-}
-async function idbSet(k,v){
-  try{const d=await idbOpen();return await new Promise((res,rej)=>{
-    const t=d.transaction(IDB_STORE,'readwrite').objectStore(IDB_STORE).put(v,k);
-    t.onsuccess=()=>res();t.onerror=()=>rej(t.error);
-  })}catch(e){}
-}
-async function idbDel(k){
-  try{const d=await idbOpen();return await new Promise((res,rej)=>{
-    const t=d.transaction(IDB_STORE,'readwrite').objectStore(IDB_STORE).delete(k);
-    t.onsuccess=()=>res();t.onerror=()=>rej(t.error);
-  })}catch(e){}
-}
-
-const fsSupported=()=>'showDirectoryPicker' in window;
-
-async function loadDirHandle(){
-  if(!fsSupported())return;
-  const h=await idbGet('bkDir');
-  if(h){ bkDirHandle=h; }
-  updateDirLabel();
-}
-function updateDirLabel(){
-  const el=$('#bkDir');if(!el)return;
-  if(!fsSupported()){el.textContent='(navegador sem suporte — usando Downloads)';return}
-  el.textContent=bkDirHandle?`✔ ${bkDirHandle.name}`:'(não definida — usando Downloads)';
-}
-async function ensureDirPermission(){
-  if(!bkDirHandle)return false;
-  let q=await bkDirHandle.queryPermission({mode:'readwrite'});
-  if(q==='granted')return true;
-  q=await bkDirHandle.requestPermission({mode:'readwrite'});
-  return q==='granted';
-}
-async function chooseDir(){
-  if(!fsSupported()){toast('Este navegador não permite escolher pasta. Use Chrome/Edge no desktop.');return}
-  try{
-    const h=await window.showDirectoryPicker({mode:'readwrite',id:'sgrh-bk'});
-    bkDirHandle=h;
-    await idbSet('bkDir',h);
-    updateDirLabel();
-    toast('Pasta de backup definida ✔');
-  }catch(e){
-    if(e.name!=='AbortError')toast('Não foi possível selecionar a pasta.');
-  }
-}
-async function forgetDir(){
-  if(!confirm('Esquecer a pasta de backup? Os próximos backups voltam a ser baixados em Downloads.'))return;
-  bkDirHandle=null;
-  await idbDel('bkDir');
-  updateDirLabel();
-  toast('Pasta esquecida.');
-}
-
-async function saveToDir(name,txt,type){
-  if(!bkDirHandle)return false;
-  if(!(await ensureDirPermission()))return false;
-  try{
-    const fh=await bkDirHandle.getFileHandle(name,{create:true});
-    const w=await fh.createWritable();
-    await w.write(new Blob([txt],{type}));
-    await w.close();
-    return true;
-  }catch(e){
-    toast('⚠️ Falha ao gravar na pasta: '+e.message);
-    return false;
-  }
-}
-
-function dl(name,txt,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-
-async function saveFile(name,txt,type){
-  const ok=await saveToDir(name,txt,type);
-  if(!ok) dl(name,txt,type);
-  return ok;
-}
-
-$('#bCsv').onclick=async()=>{
-  const L=[['Data','Turno/Tipo','Colaboradores','Categoria','Status','Campo 1','Campo 2','Campo 3','Campo 4','Campo 5','Familiares / Visitantes']];
-  for(const [d,tt] of Object.entries(db[mk()]||{})){
-    for(const t of ['SD','SN']){
-      const b=tt[t];if(!b)continue;
-      for(const [k,rows] of Object.entries(b.secs||{})){
-        rows.filter(r=>!vazia(r)).forEach(r=>L.push([`${p2(d)}/${p2(st.mes)}/${st.ano}`,t,b.colab,SECS.find(s=>s[0]===k)[1],r.s==='a'?'Agendada':'Realizada',...[0,1,2,3,4].map(i=>r.v[i]||''),famTxt(r.f)]));
-      }
+    function addVisitorRow(pi) {
+      visList(true)[pi]?.v.push(NV());
+      save();
+      renderVisitasView();
     }
-    (tt.visitas||[]).forEach(p=>L.push([`${p2(d)}/${p2(st.mes)}/${st.ano}`,'VISITAS','','CONTROLE DE VISITAS','Registrada',p.pac,p.leito,p.obs||'','','',visTxt(p.v)]));
-  }
-  const csv='\ufeff'+L.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
-  const viaPasta=await saveFile(`demandas_${mk()}.csv`,csv,'text/csv');
-  toast(viaPasta?'CSV salvo na pasta ✔':'CSV exportado ✔');
-};
 
-const cntM=m=>Object.values(m||{}).reduce((a,d)=>a+cnt(d.SD)+cnt(d.SN)+(Array.isArray(d.visitas)?d.visitas.filter(p=>(p.v||[]).some(v=>v.n)).length:0),0);
-const fdt=t=>t?new Date(t).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'nunca';
-const lab=k=>`${MESES[+k.slice(5)-1]}/${k.slice(0,4)}`;
-const stamp=()=>{const d=new Date();return `${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}`};
-function stat(k){if(!cntM(db[k]))return'vazio';if(!meta.bk[k])return'nunca';return(meta.alt[k]||0)>meta.bk[k]?'pendente':'ok'}
-function saveMeta(){try{localStorage.setItem(KEY+'_meta',JSON.stringify(meta))}catch(e){}}
-function aviso(){const k=mk(),s=stat(k),a=$('#aviso');a.hidden=s==='ok'||s==='vazio';if(a.hidden)return;
-  a.innerHTML=`<span>⚠️ <b>${lab(k)}</b>: ${s==='nunca'?'ainda não tem backup':'há alterações desde o último backup ('+fdt(meta.bk[k])+')'}.</span><button class="on" id="bAv">Salvar backup deste mês</button>`}
-$('#aviso').onclick=e=>{if(e.target.id==='bAv')bkMes(mk())};
+    function updateVisitorField(pi, vi, field, val) {
+      const v = visList(true)[pi]?.v?.[vi];
+      if (!v) return;
+      v[field] = field === 'n' ? val.toUpperCase() : val;
+      save();
+    }
 
-async function bkMes(k){
-  const m=db[k];if(!m)return;
-  const nome=`backup_demandas_${k}_${stamp()}.json`;
-  const conteudo=JSON.stringify({app:'relatorio-demandas',versao:2,tipo:'mes',mes:k,exportadoEm:new Date().toISOString(),registros:cntM(m),dados:{[k]:m}});
-  const viaPasta=await saveFile(nome,conteudo,'application/json');
-  meta.bk[k]=Date.now();saveMeta();aviso();bkUi();
-  toast(viaPasta?`Backup de ${lab(k)} salvo na pasta ✔`:`Backup de ${lab(k)} baixado ✔`);
-}
-async function bkTudo(){
-  const nome=`backup_demandas_COMPLETO_${stamp()}.json`;
-  const conteudo=JSON.stringify({app:'relatorio-demandas',versao:2,tipo:'completo',exportadoEm:new Date().toISOString(),registros:Object.values(db).reduce((a,m)=>a+cntM(m),0),dados:db});
-  const viaPasta=await saveFile(nome,conteudo,'application/json');
-  Object.keys(db).forEach(k=>{if(cntM(db[k]))meta.bk[k]=Date.now()});saveMeta();aviso();bkUi();
-  toast(viaPasta?'Backup completo salvo na pasta ✔':'Backup completo baixado ✔');
-}
+    function stampVisitorTime(pi, vi, field) {
+      const v = visList(true)[pi]?.v?.[vi];
+      if (!v) return;
+      v[field] = nowHHMM();
+      save();
+      renderVisitasView();
+    }
 
-function bkUi(){
-  const ks=[...new Set([...Object.keys(db),mk()])].sort().reverse();
-  const E={ok:'<span class="ok">✔ em dia</span>',pendente:'<span class="r">alterado após o backup</span>',nunca:'<span class="r">sem backup</span>',vazio:'<span class="tip">vazio</span>'};
-  $('#bkbox').innerHTML=`
-    <p style="margin:0 0 8px"><b>📁 Pasta de backup:</b> <span id="bkDir">…</span></p>
-    <p style="margin:0 0 12px">
-      <button type="button" data-a="dir">📁 Escolher pasta…</button>
-      <button type="button" data-a="dirforget">✖ Esquecer pasta</button>
-    </p>
-    <table class="bk"><tr><th>Mês</th><th>Registros</th><th>Último backup</th><th></th></tr>${ks.map(k=>`<tr><td>${lab(k)}</td><td>${cntM(db[k])}</td><td>${fdt(meta.bk[k])}<br>${E[stat(k)]}</td><td><button type="button" data-bk="${k}">Salvar mês</button></td></tr>`).join('')}</table>
-    <p><button type="button" data-a="all" class="on">Backup completo</button> <button type="button" data-a="load">Carregar backup…</button> <button type="button" data-a="undo" ${localStorage.getItem(KEY+'_snap')?'':'disabled'}>↩️ Desfazer última importação</button></p>
-    <p class="tip">Salve o backup do mês ao fim de cada semana/plantão e guarde cópias fora deste computador (pendrive ou nuvem). Não use aba anônima nem limpe os “dados do site”. <span id="pers"></span></p>`;
-  updateDirLabel();
-  try{navigator.storage.persisted().then(p=>{const e=$('#pers');if(e)e.textContent=p?'Armazenamento protegido pelo navegador: sim.':'Armazenamento protegido pelo navegador: não garantido — mantenha os backups em dia.'})}catch(e){}
-}
+    function deleteVisitorRow(pi, vi) {
+      visList(true)[pi]?.v.splice(vi, 1);
+      save();
+      renderVisitasView();
+    }
 
-$('#bBk').onclick=()=>{bkUi();$('#dbk').showModal()};
-$('#dbk').onclick=e=>{
-  const b=e.target.closest('button');if(!b)return;
-  if(b.dataset.bk)bkMes(b.dataset.bk);
-  else if(b.dataset.a==='all')bkTudo();
-  else if(b.dataset.a==='load')$('#file').click();
-  else if(b.dataset.a==='undo')desfazer();
-  else if(b.dataset.a==='dir')chooseDir();
-  else if(b.dataset.a==='dirforget')forgetDir();
-};
+    /* ==================== ABA 3: HISTÓRICO DO PACIENTE ==================== */
+    const srtTimeline = (a, b) => a.k.localeCompare(b.k) || a.d - b.d || a.t.localeCompare(b.t) || SECS.findIndex(s => s[0] === a.sk) - SECS.findIndex(s => s[0] === b.sk);
 
-function desfazer(){try{const s=JSON.parse(localStorage.getItem(KEY+'_snap'));if(!s||!confirm('Voltar os dados ao estado de '+fdt(s.em)+' (antes da última importação)?'))return;db=s.db;meta=s.meta||meta;localStorage.setItem(KEY,JSON.stringify(db));saveMeta();localStorage.removeItem(KEY+'_snap');render();bkUi();toast('Importação desfeita ✔')}catch(e){alert('Não foi possível desfazer.')}}
-
-$('#file').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();
-  rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o||o.app!=='relatorio-demandas'||typeof o.dados!=='object')throw 0;mig(o.dados);
-    const ks=Object.keys(o.dados).sort(),n=Object.values(o.dados).reduce((a,m)=>a+cntM(m),0);
-    if(o.registros!=null&&o.registros!==n){alert(`Arquivo possivelmente corrompido: esperado ${o.registros} registros, encontrados ${n}. Importação cancelada.`);return}
-    const rep=confirm(`Backup com ${n} registros de: ${ks.map(lab).join(', ')}.\n\nOK = SUBSTITUIR esses meses pelos do arquivo (os outros meses não são alterados).\nCancelar = MESCLAR (junta por dia/turno e mantém o restante).`);
-    try{localStorage.setItem(KEY+'_snap',JSON.stringify({em:Date.now(),db,meta}))}catch(_){}
-    ks.forEach(k=>{if(rep)db[k]=o.dados[k];else{db[k]=db[k]||{};Object.entries(o.dados[k]).forEach(([d,tt])=>{db[k][d]=Object.assign(db[k][d]||{},tt)})}meta.bk[k]=Date.now();meta.alt[k]=0});
-    try{localStorage.setItem(KEY,JSON.stringify(db))}catch(_){}saveMeta();
-    const l=ks[ks.length-1];if(l&&!db[mk()]){st.ano=+l.slice(0,4);st.mes=+l.slice(5);st.dia=1}
-    init();bkUi();toast('Backup importado ✔ (dá para desfazer em 💾 Backup)')}catch(err){alert('Arquivo inválido. Selecione um backup .json exportado por este sistema.')}};rd.readAsText(f)};
-
-const srt=(a,b)=>a.k.localeCompare(b.k)||a.d-b.d||a.t.localeCompare(b.t)||SECS.findIndex(s=>s[0]===a.sk)-SECS.findIndex(s=>s[0]===b.sk);
-const fdd=(k,d)=>`${p2(d)}/${k.slice(5)}/${k.slice(0,4)}`;
-
-function pacs(){
-  const M=new Map();
-  for(const [k,dias] of Object.entries(db)){
-    for(const [d,tt] of Object.entries(dias)){
-      for(const t of ['SD','SN']){
-        const b=tt[t];if(!b||!b.secs)continue;
-        for(const [sk,rows] of Object.entries(b.secs)){
-          rows.forEach(r=>{
-            const n=nrm(r.v[0]);if(!n||vazia(r))return;
-            let p=M.get(n);
-            if(!p){p={nome:r.v[0].trim(),regs:[]};M.set(n,p)}
-            p.regs.push({k,d:+d,t,sk,r});
+    function buildPatientsMap() {
+      const M = new Map();
+      for (const [k, dias] of Object.entries(db)) {
+        for (const [d, tt] of Object.entries(dias)) {
+          for (const t of ['SD', 'SN']) {
+            const b = tt[t];
+            if (!b || !b.secs) continue;
+            for (const [sk, rows] of Object.entries(b.secs)) {
+              rows.forEach(r => {
+                const n = nrm(r.v[0]);
+                if (!n || vazia(r)) return;
+                let p = M.get(n);
+                if (!p) { p = { nome: r.v[0].trim(), regs: [] }; M.set(n, p); }
+                p.regs.push({ k, d: +d, t, sk, r });
+              });
+            }
+          }
+          (tt.visitas || []).forEach(vp => {
+            const n = nrm(vp.pac);
+            if (!n) return;
+            let p = M.get(n);
+            if (!p) { p = { nome: vp.pac.trim(), regs: [] }; M.set(n, p); }
+            p.regs.push({ k, d: +d, t: 'VIS', sk: 'vis', vp });
           });
         }
       }
-      (tt.visitas||[]).forEach(vp=>{
-        const n=nrm(vp.pac);if(!n)return;
-        let p=M.get(n);
-        if(!p){p={nome:vp.pac.trim(),regs:[]};M.set(n,p)}
-        p.regs.push({k,d:+d,t:'VIS',sk:'vis',vp});
+      return M;
+    }
+
+    function getPatientLeitos(p) {
+      const L = [];
+      [...p.regs].sort(srtTimeline).forEach(x => {
+        if (x.sk === 'vis') {
+          const v = (x.vp.leito || '').trim();
+          if (v && L[L.length - 1] !== v) L.push(v);
+          return;
+        }
+        const labs = SECS.find(s => s[0] === x.sk)[3];
+        labs.forEach((l, j) => {
+          const v = (x.r.v[j] || '').trim();
+          if (/leito|setor/i.test(l) && v && L[L.length - 1] !== v) L.push(v);
+        });
+      });
+      return L;
+    }
+
+    function openPatientHistory(name) {
+      if (!nrm(name)) { toast('Preencha o nome do paciente primeiro.'); return; }
+      st.pq = name.trim();
+      st.pk = nrm(name);
+      switchTab('pac');
+    }
+
+    function onPacSearchInput(val) {
+      st.pq = val;
+      st.pk = '';
+      renderPacView();
+    }
+
+    function selectPatientCard(pk) {
+      st.pk = pk;
+      renderPacView();
+    }
+
+    function openRecordDay(k, d, t) {
+      st.ano = +k.slice(0, 4);
+      st.mes = +k.slice(5);
+      st.dia = +d;
+      updateDayDropdowns();
+      if (t === 'VIS') {
+        switchTab('visitas');
+      } else {
+        st.shift = t;
+        setShiftFilter(t);
+        switchTab('operacional');
+      }
+      renderAll();
+    }
+
+    function renderPacView() {
+      const inp = document.getElementById('pac-search-input');
+      if (inp && inp.value !== st.pq) inp.value = st.pq;
+
+      const box = document.getElementById('pac-timeline-container');
+      const M = buildPatientsMap();
+      const q = nrm(st.pq);
+      const toks = q.split(' ').filter(Boolean);
+
+      if (st.pk && M.has(st.pk)) {
+        box.innerHTML = renderPatientTimelineHTML(M.get(st.pk));
+        return;
+      }
+      if (q.length < 2) {
+        box.innerHTML = `<div class="bg-white rounded-2xl p-6 border border-slate-200/80 text-xs text-slate-500">
+          Digite o nome do paciente acima para ver toda a trajetória dele: admissões, transferências, exames, visitas, altas, óbito e demandas.
+        </div>`;
+        return;
+      }
+      const list = [...M.entries()].filter(([n]) => toks.every(t => n.includes(t))).sort((a, b) => b[1].regs.length - a[1].regs.length);
+      if (list.length === 1) {
+        box.innerHTML = renderPatientTimelineHTML(list[0][1]);
+        return;
+      }
+      if (!list.length) {
+        box.innerHTML = `<div class="bg-white rounded-2xl p-6 border border-slate-200/80 text-xs text-slate-500">Nenhum paciente encontrado. Tente digitar apenas parte do nome.</div>`;
+        return;
+      }
+      box.innerHTML = list.slice(0, 60).map(([n, p]) => `
+        <div onclick="selectPatientCard('${esc(n)}')" class="cursor-pointer bg-white hover:border-sky-400 rounded-xl p-4 border border-slate-200 shadow-sm flex items-center justify-between transition">
+          <div>
+            <p class="font-bold text-sm text-slate-800">${esc(p.nome)}</p>
+            <p class="text-xs text-slate-500 mt-0.5">${p.regs.length} registro(s) • ${esc(getPatientLeitos(p).slice(0, 4).join(' → ')) || 'sem leito registrado'}</p>
+          </div>
+          <span class="text-xs font-semibold text-sky-600">Ver ficha →</span>
+        </div>
+      `).join('');
+    }
+
+    function renderPatientTimelineHTML(p) {
+      const R = [...p.regs].sort(srtTimeline);
+      const c = {};
+      R.forEach(x => c[x.sk] = (c[x.sk] || 0) + 1);
+      const L = getPatientLeitos(p);
+      const a = R[0], z = R[R.length - 1];
+
+      const chips = SECS.filter(s => c[s[0]]).map(s => `<span class="inline-block bg-sky-50 text-sky-800 border border-sky-200 rounded-full px-2.5 py-0.5 text-[11px] font-semibold mr-1.5 mb-1">${s[1]}: <b>${c[s[0]]}</b></span>`).join('') +
+        (c.vis ? `<span class="inline-block bg-teal-50 text-teal-800 border border-teal-200 rounded-full px-2.5 py-0.5 text-[11px] font-semibold mr-1.5 mb-1">Visitas: <b>${c.vis}</b></span>` : '');
+
+      let header = `<div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 class="text-lg font-extrabold text-slate-900">${esc(p.nome)}</h3>
+          <button onclick="st.pk='';st.pq='';renderPacView()" class="text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg no-print">← Nova busca</button>
+        </div>
+        <p class="text-xs text-slate-500">${R.length} registro(s) • de <b>${fdd(a.k, a.d)}</b> a <b>${fdd(z.k, z.d)}</b></p>
+        <div>${chips}</div>
+        ${L.length ? `<p class="text-xs text-slate-600 pt-1"><b>Trajetória de leitos:</b> ${esc(L.join(' → '))}</p>` : ''}
+      </div>`;
+
+      let events = R.map(x => {
+        const diaSem = new Date(+x.k.slice(0, 4), +x.k.slice(5) - 1, x.d).toLocaleDateString('pt-BR', { weekday: 'short' });
+        if (x.sk === 'vis') {
+          const vp = x.vp;
+          const vt = visTxt(vp.v);
+          return `<div class="bg-white rounded-xl p-4 border border-slate-200 border-l-4 border-l-teal-500 shadow-sm space-y-1.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-mono text-xs font-bold text-slate-800">${fdd(x.k, x.d)}</span>
+                <span class="text-xs text-slate-400">${diaSem} • Portaria</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">CONTROLE DE VISITAS</span>
+                <span class="text-xs font-semibold text-slate-600">${(vp.v || []).filter(v => v.n).length} visitante(s)</span>
+              </div>
+              <button onclick="openRecordDay('${x.k}',${x.d},'VIS')" class="text-xs font-semibold text-sky-600 hover:underline no-print">Abrir no dia →</button>
+            </div>
+            <div class="text-xs text-slate-700">${vp.leito ? `<b>Leito:</b> ${esc(vp.leito)} ` : ''}${vp.obs ? `• <b>Obs.:</b> ${esc(vp.obs)}` : ''}</div>
+            ${vt ? `<div class="text-xs text-slate-500">🪪 ${esc(vt)}</div>` : ''}
+          </div>`;
+        }
+        const [, label, , labs] = SECS.find(s => s[0] === x.sk);
+        const isAg = x.r.s === 'a';
+        const details = labs.map((l, j) => j && x.r.v[j] ? `<span class="mr-4"><b>${l}:</b> ${esc(x.r.v[j])}</span>` : '').join('');
+        return `<div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm space-y-1.5 ${isAg ? 'row-agendado' : 'row-realizado'}">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-mono text-xs font-bold text-slate-800">${fdd(x.k, x.d)}</span>
+              <span class="text-xs text-slate-400">${diaSem} • ${x.t === 'SD' ? 'Diurno (SD)' : 'Noturno (SN)'}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">${label}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isAg ? 'status-agendado' : 'status-realizado'}">${isAg ? 'Agendada' : 'Realizada'}</span>
+            </div>
+            <button onclick="openRecordDay('${x.k}',${x.d},'${x.t}')" class="text-xs font-semibold text-sky-600 hover:underline no-print">Abrir no dia →</button>
+          </div>
+          <div class="text-xs text-slate-700">${details || '—'}</div>
+          ${(x.r.f && x.r.f.length) ? `<div class="text-xs text-slate-500">👪 ${esc(famTxt(x.r.f))}</div>` : ''}
+        </div>`;
+      }).join('');
+
+      return header + events;
+    }
+
+    /* ==================== ABA 4: DASHBOARD / PAINEL DO MÊS ==================== */
+    function renderDashboard() {
+      const m = db[mk()] || {};
+      const maxD = nd(st.ano, st.mes);
+      let tot = 0, ag = 0, re = 0, visTot = 0;
+      const catCounts = {}, sh = { SD: 0, SN: 0 }, dailyVolume = [], colabCount = {};
+      SECS.forEach(s => catCounts[s[0]] = 0);
+
+      for (let d = 1; d <= maxD; d++) {
+        let daySum = 0;
+        const dayObj = m[d] || {};
+        visTot += cntVis(d);
+        ['SD', 'SN'].forEach(t => {
+          const b = dayObj[t];
+          if (!b) return;
+          const n = cnt(b);
+          daySum += n;
+          sh[t] += n;
+          for (const [sk, rows] of Object.entries(b.secs || {})) {
+            const valid = rows.filter(r => !vazia(r));
+            catCounts[sk] += valid.length;
+            valid.forEach(r => r.s === 'a' ? ag++ : re++);
+          }
+          if (n || b.colab) {
+            (b.colab || '').toUpperCase().split(/\s*(?:\/|,|;|&|\+|\sE\s|\s-\s)\s*/)
+              .map(x => x.replace(/\(.*?\)|\bSD\b|\bSN\b/g, '').trim())
+              .filter(Boolean)
+              .forEach(x => colabCount[x] = (colabCount[x] || 0) + 1);
+          }
+        });
+        dailyVolume.push(daySum);
+        tot += daySum;
+      }
+
+      document.getElementById('dash-month-label').textContent = `Consolidado Mensal — ${MESES[st.mes - 1]} de ${st.ano}`;
+      document.getElementById('dash-total-records').textContent = tot;
+      document.getElementById('dash-total-ag').textContent = ag;
+      document.getElementById('dash-total-re').textContent = re;
+      document.getElementById('dash-total-vis').textContent = visTot;
+
+      document.getElementById('dash-kpi-cards').innerHTML = SECS.map(([sk, label]) => `
+        <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <span class="text-[10px] font-bold uppercase text-slate-400 leading-tight">${label}</span>
+          <span class="text-xl font-extrabold text-slate-800 mt-1">${catCounts[sk]}</span>
+        </div>
+      `).join('');
+
+      const maxSh = Math.max(sh.SD, sh.SN, 1);
+      document.getElementById('dash-shift-bars').innerHTML = [
+        ['☀️ Diurno (SD)', sh.SD, 'bg-amber-500'],
+        ['🌙 Noturno (SN)', sh.SN, 'bg-indigo-500']
+      ].map(([lbl, v, cls]) => `
+        <div>
+          <div class="flex justify-between text-xs font-bold mb-1"><span>${lbl}</span><span>${v} registros</span></div>
+          <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden"><div class="${cls} h-full rounded-full" style="width:${(v / maxSh) * 100}%"></div></div>
+        </div>
+      `).join('');
+
+      const cl = Object.entries(colabCount).sort((a, b) => b[1] - a[1]);
+      const maxCl = cl.length ? cl[0][1] : 1;
+      document.getElementById('dash-collab-bars').innerHTML = cl.length ? cl.map(([nome, v]) => `
+        <div class="flex items-center gap-3 text-xs">
+          <span class="w-32 font-semibold truncate">${esc(nome)}</span>
+          <div class="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden"><div class="bg-sky-600 h-full rounded-full" style="width:${(v / maxCl) * 100}%"></div></div>
+          <span class="font-bold w-8 text-right">${v}</span>
+        </div>
+      `).join('') : '<p class="text-xs text-slate-400">Sem colaboradores informados neste mês.</p>';
+
+      if (!window.Chart) return;
+      if (chartVolumeInstance) chartVolumeInstance.destroy();
+      chartVolumeInstance = new Chart(document.getElementById('chart-daily-volume'), {
+        type: 'line',
+        data: {
+          labels: Array.from({ length: maxD }, (_, i) => i + 1),
+          datasets: [{ label: 'Registros', data: dailyVolume, borderColor: '#0284C7', backgroundColor: 'rgba(2, 132, 199, 0.1)', fill: true, tension: 0.3 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      if (chartCategoryInstance) chartCategoryInstance.destroy();
+      chartCategoryInstance = new Chart(document.getElementById('chart-category-dist'), {
+        type: 'doughnut',
+        data: {
+          labels: SECS.map(s => s[1]),
+          datasets: [{ data: SECS.map(s => catCounts[s[0]]), backgroundColor: ['#0EA5E9', '#14B8A6', '#F59E0B', '#6366F1', '#EF4444', '#8B5CF6', '#64748B'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
       });
     }
-  }
-  return M;
-}
 
-function leitos(p){
-  const L=[];
-  [...p.regs].sort(srt).forEach(x=>{
-    if(x.sk==='vis'){
-      const v=(x.vp.leito||'').trim();
-      if(v && L[L.length-1]!==v) L.push(v);
-      return;
-    }
-    SECS.find(s=>s[0]===x.sk)[2].forEach((l,j)=>{
-      const v=(x.r.v[j]||'').trim();
-      if(/leito/i.test(l)&&v&&L[L.length-1]!==v)L.push(v);
-    });
-  });
-  return L;
-}
+    /* ==================== ABA 5: BUSCA GLOBAL ==================== */
+    function renderGlobalSearch() {
+      const q = document.getElementById('global-search-input').value.trim().toLowerCase();
+      const resultsDiv = document.getElementById('global-search-results');
+      if (q.length < 2) { resultsDiv.innerHTML = ''; return; }
 
-function ficha(p){
-  const R=[...p.regs].sort(srt),c={};
-  R.forEach(x=>c[x.sk]=(c[x.sk]||0)+1);
-  const L=leitos(p),a=R[0],z=R[R.length-1];
-  const chips=SECS.filter(s=>c[s[0]]).map(s=>`<span class="chip">${s[1]}: <b>${c[s[0]]}</b></span>`).join('')+
-    (c.vis?`<span class="chip">VISITAS: <b>${c.vis}</b></span>`:'');
+      const out = [];
+      for (const [k, dias] of Object.entries(db)) {
+        for (const [d, tt] of Object.entries(dias)) {
+          for (const t of ['SD', 'SN']) {
+            const b = tt[t];
+            if (!b || !b.secs) continue;
+            for (const [sk, rows] of Object.entries(b.secs)) {
+              rows.filter(r => !vazia(r)).forEach(r => {
+                const tx = `${(r.v || []).join(' ')} ${famTxt(r.f)}`;
+                if (tx.toLowerCase().includes(q)) {
+                  out.push({ k, d: +d, t, sn: SECS.find(s => s[0] === sk)[1], s: r.s, tx: tx.trim().slice(0, 140) });
+                }
+              });
+            }
+          }
+          (tt.visitas || []).forEach(vp => {
+            const tx = `${vp.pac} ${vp.leito} ${vp.obs || ''} ${visTxt(vp.v)}`;
+            if (tx.toLowerCase().includes(q)) {
+              out.push({ k, d: +d, t: 'VIS', sn: 'Controle de Visitas', s: 'r', tx: tx.trim().slice(0, 140) });
+            }
+          });
+        }
+      }
 
-  return `<div class="cd">
-    <div class="rh">
-      <h3 style="font-size:17px;margin:0">${esc(p.nome)}</h3>
-      <button data-pa="back" style="margin-left:auto">← Nova busca</button>
-      <button data-pa="print">🖨️ Imprimir</button>
-    </div>
-    <div class="tip">${R.length} registro(s) · de ${fdd(a.k,a.d)} a ${fdd(z.k,z.d)}</div>
-    <div style="margin-top:6px">${chips}</div>
-    ${L.length?`<div class="tip" style="margin-top:6px"><b>Leitos:</b> ${esc(L.join(' → '))}</div>`:''}
-  </div>`+
-  R.map(x=>{
-    const diaSem=new Date(+x.k.slice(0,4),+x.k.slice(5)-1,x.d).toLocaleDateString('pt-BR',{weekday:'short'});
-    if(x.sk==='vis'){
-      const vp=x.vp;
-      const f=`${vp.leito?`<span><b>Leito:</b> ${esc(vp.leito)}</span>`:''}${vp.obs?`<span><b>Obs.:</b> ${esc(vp.obs)}</span>`:''}`;
-      const vt=visTxt(vp.v);
-      return `<div class="ev r">
-        <div class="rh">
-          <b>${fdd(x.k,x.d)}</b>
-          <span class="tip">${diaSem} · Portaria</span>
-          <span class="chip">CONTROLE DE VISITAS</span>
-          <span class="st1">${(vp.v||[]).filter(v=>v.n).length} visitante(s)</span>
-          <button data-pa="open" data-k="${x.k}" data-d="${x.d}" data-t="VIS" style="margin-left:auto">Abrir no dia</button>
+      out.sort((a, b) => (b.k + p2(b.d)).localeCompare(a.k + p2(a.d)));
+      const list = out.slice(0, 100);
+      if (!list.length) {
+        resultsDiv.innerHTML = '<p class="text-xs text-slate-500 p-4 bg-white rounded-xl border border-slate-200">Nenhum resultado encontrado.</p>';
+        return;
+      }
+
+      resultsDiv.innerHTML = list.map(o => `
+        <div onclick="openRecordDay('${o.k}',${o.d},'${o.t}')" class="cursor-pointer bg-white hover:border-sky-400 rounded-xl p-4 border border-slate-200 shadow-sm flex items-center justify-between gap-3 transition">
+          <div>
+            <p class="text-xs font-bold text-sky-700">${fdd(o.k, o.d)} • ${o.t} — ${o.sn}</p>
+            <p class="text-xs text-slate-700 mt-0.5">${esc(o.tx)}</p>
+          </div>
+          ${o.t !== 'VIS' ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${o.s === 'a' ? 'status-agendado' : 'status-realizado'}">${o.s === 'a' ? 'Agendada' : 'Realizada'}</span>` : ''}
         </div>
-        <div class="f">${f}</div>
-        ${vt?`<div class="tip">🪪 ${esc(vt)}</div>`:''}
-      </div>`;
+      `).join('');
     }
-    const [,n,labs]=SECS.find(s=>s[0]===x.sk);
-    const f=labs.map((l,j)=>j&&x.r.v[j]?`<span><b>${l}:</b> ${esc(x.r.v[j])}</span>`:'').join('');
-    return `<div class="ev ${x.r.s}">
-      <div class="rh">
-        <b>${fdd(x.k,x.d)}</b>
-        <span class="tip">${diaSem} · ${x.t==='SD'?'Diurno':'Noturno'}</span>
-        <span class="chip">${n}</span>
-        <span class="st1">${x.r.s==='a'?'Agendada':'Realizada'}</span>
-        <button data-pa="open" data-k="${x.k}" data-d="${x.d}" data-t="${x.t}" style="margin-left:auto">Abrir no dia</button>
-      </div>
-      <div class="f">${f}</div>
-      ${x.r.f.length?`<div class="tip">👪 ${esc(famTxt(x.r.f))}</div>`:''}
-    </div>`;
-  }).join('');
-}
 
-function pbox(){
-  const M=pacs(),q=nrm(st.pq),toks=q.split(' ').filter(Boolean),box=$('#pbox');
-  if(st.pk&&M.has(st.pk)){box.innerHTML=ficha(M.get(st.pk));return}
-  if(q.length<2){box.innerHTML='<div class="empty">Digite o nome do paciente para ver todos os registros dele: admissões, transferências, exames, visitas, altas, óbito e demandas.</div>';return}
-  const L=[...M.entries()].filter(([n])=>toks.every(t=>n.includes(t))).sort((a,b)=>b[1].regs.length-a[1].regs.length);
-  if(L.length===1){box.innerHTML=ficha(L[0][1]);return}
-  box.innerHTML=L.length?L.slice(0,60).map(([n,p])=>`<div class="cd pi" data-pk="${esc(n)}"><b>${esc(p.nome)}</b> <span class="tip">${p.regs.length} registro(s) · ${esc(leitos(p).slice(0,4).join(' → '))||'sem leito'}</span></div>`).join(''):'<div class="empty">Nenhum paciente encontrado. Tente apenas parte do nome.</div>';
-}
+    /* ==================== ABA 6: PASSAGEM DE PLANTÃO / IMPRESSÃO ==================== */
+    function renderPrintView() {
+      const sheet = document.getElementById('printable-sheet');
+      const d = +(document.getElementById('print-day-select').value || st.dia);
+      const shiftSelect = document.getElementById('print-shift-select').value;
+      let html = '', any = false;
 
-function renderPac(){
-  $('#v-pac').innerHTML=`<div class="meta"><label>🧑‍⚕️ Buscar paciente (nome ou parte do nome)<input id="pq" value="${esc(st.pq)}" placeholder="Ex.: maria jose" autocomplete="off"></label><span class="tip">Mostra todos os registros do paciente em todos os meses (incluindo visitas).</span></div><div id="pbox"></div>`;
-  pbox();
-  if(!st.pk)$('#pq').focus();
-}
+      ['SD', 'SN'].forEach(t => {
+        if (shiftSelect !== 'ALL' && shiftSelect !== t) return;
+        const b = blk(false, t, d);
+        if (!b || (!cnt(b) && !b.colab)) return;
+        any = true;
+        html += `<div class="mb-6">
+          <h3 class="text-base font-extrabold text-slate-900 border-b border-slate-300 pb-1">RELATÓRIO COMPARTILHADO — DIA ${dtxt(d)} — TURNO ${t}</h3>
+          <p class="text-xs text-slate-600 mt-1 mb-3">Colaboradores: <b>${esc(b.colab) || '—'}</b> • <span class="text-red-600 font-bold">Vermelho = Agendada</span> | Preto = Realizada</p>`;
+        SECS.forEach(([sk, label, , labs]) => {
+          const rows = b.secs[sk].filter(r => !vazia(r));
+          if (!rows.length) return;
+          html += `<h4 class="text-xs font-bold uppercase text-slate-700 mt-3 mb-1">${label}</h4>
+            <table class="w-full text-xs border border-slate-300 mb-3">
+              <thead><tr class="bg-slate-100 border-b border-slate-300">${labs.map(l => `<th class="p-1.5 text-left font-bold">${l}</th>`).join('')}<th class="p-1.5 text-left font-bold">Familiares / Contato</th></tr></thead>
+              <tbody>${rows.map(r => `<tr class="border-b border-slate-200 ${r.s === 'a' ? 'txt-agendado text-red-600 font-semibold' : ''}">${labs.map((_, j) => `<td class="p-1.5">${esc(r.v[j])}</td>`).join('')}<td class="p-1.5">${esc(famTxt(r.f))}</td></tr>`).join('')}</tbody>
+            </table>`;
+        });
+        html += `</div>`;
+      });
 
-$('#v-pac').oninput=e=>{if(e.target.id==='pq'){st.pq=e.target.value;st.pk='';pbox()}};
-$('#v-pac').onclick=e=>{
-  const pi=e.target.closest('[data-pk]');if(pi){st.pk=pi.dataset.pk;pbox();return}
-  const b=e.target.closest('[data-pa]');if(!b)return;const a=b.dataset.pa;
-  if(a==='back'){st.pk='';st.pq='';renderPac()}
-  else if(a==='print')window.print();
-  else if(a==='open'){
-    st.ano=+b.dataset.k.slice(0,4);
-    st.mes=+b.dataset.k.slice(5);
-    st.dia=+b.dataset.d;
-    if(b.dataset.t==='VIS'){st.v='vis'}
-    else{st.turno=b.dataset.t;st.v='op'}
-    render();
-  }
-};
+      const vis = visList(false, d);
+      if (vis.length && shiftSelect === 'ALL') {
+        any = true;
+        html += `<div class="mt-4">
+          <h3 class="text-base font-extrabold text-slate-900 border-b border-slate-300 pb-1 mb-2">CONTROLE DE VISITAS — DIA ${dtxt(d)}</h3>
+          <table class="w-full text-xs border border-slate-300">
+            <thead><tr class="bg-slate-100 border-b border-slate-300"><th class="p-1.5 text-left">Paciente</th><th class="p-1.5 text-left">Setor / Leito</th><th class="p-1.5 text-left">Observação</th><th class="p-1.5 text-left">Visitantes (Entrada / Saída)</th></tr></thead>
+            <tbody>${vis.map(p => `<tr class="border-b border-slate-200"><td class="p-1.5 font-semibold">${esc(p.pac)}</td><td class="p-1.5">${esc(p.leito)}</td><td class="p-1.5">${esc(p.obs || '')}</td><td class="p-1.5">${esc(visTxt(p.v))}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>`;
+      }
 
-$('#bBusca').onclick=()=>{$('#dlg').showModal();$('#q').value='';$('#res').innerHTML='';$('#q').focus()};
-$('#q').oninput=e=>{
-  const q=e.target.value.trim().toLowerCase(),out=[];
-  if(q.length>=2){
-    for(const [k,dias] of Object.entries(db)){
-      for(const [d,tt] of Object.entries(dias)){
-        for(const t of ['SD','SN']){
-          const b=tt[t];if(!b||!b.secs)continue;
-          for(const [sk,rows] of Object.entries(b.secs)){
-            rows.filter(r=>!vazia(r)).forEach(r=>{
-              const tx=r.v.join(' ')+' '+famTxt(r.f);
-              if(tx.toLowerCase().includes(q))out.push({k,d,t,view:'op',sn:SECS.find(s=>s[0]===sk)[1],tx:tx.trim().slice(0,110)});
-            });
+      sheet.innerHTML = any ? html : `<p class="text-xs text-slate-400">Sem registros em ${dtxt(d)}.</p>`;
+    }
+
+    function copyShiftSummary() {
+      let out = [`*RELATÓRIO RECEPÇÃO — ${dtxt()}*`];
+      const shifts = st.shift === 'ALL' ? ['SD', 'SN'] : [st.shift];
+      shifts.forEach(t => {
+        const b = blk(false, t);
+        if (!b || (!cnt(b) && !b.colab)) return;
+        out.push(`\n*TURNO ${t}* (${b.colab || 'Equipe não informada'})`);
+        SECS.forEach(([sk, label]) => {
+          const rows = b.secs[sk].filter(r => !vazia(r));
+          if (!rows.length) return;
+          out.push(`*${label}:*`);
+          rows.forEach(r => {
+            const stTag = r.s === 'a' ? '[AGENDADA]' : '[REALIZADA]';
+            out.push(`• ${stTag} ${r.v.filter(Boolean).join(' | ')}`);
+          });
+        });
+      });
+      const vis = visList(false);
+      if (vis.length) {
+        out.push(`\n*VISITAS DO DIA (${vis.length} paciente(s)):*`);
+        vis.forEach(p => out.push(`• ${p.pac} (${p.leito || 'S/L'}): ${visTxt(p.v) || 'Sem visitante'}`));
+      }
+      const txt = out.join('\n');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => toast('Resumo copiado para WhatsApp ✔')).catch(() => prompt('Copie o texto abaixo:', txt));
+      } else {
+        prompt('Copie o texto abaixo:', txt);
+      }
+    }
+
+    /* ==================== PASTA DE BACKUP (File System Access API) ==================== */
+    const IDB_NAME = 'sgrh_fs';
+    const IDB_STORE = 'handles';
+    let bkDirHandle = null;
+
+    function idbOpen() {
+      return new Promise((res, rej) => {
+        const r = indexedDB.open(IDB_NAME, 1);
+        r.onupgradeneeded = () => r.result.createObjectStore(IDB_STORE);
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      });
+    }
+    async function idbGet(k) {
+      try {
+        const d = await idbOpen();
+        return await new Promise((res, rej) => {
+          const t = d.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(k);
+          t.onsuccess = () => res(t.result);
+          t.onerror = () => rej(t.error);
+        });
+      } catch (e) { return null; }
+    }
+    async function idbSet(k, v) {
+      try {
+        const d = await idbOpen();
+        return await new Promise((res, rej) => {
+          const t = d.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).put(v, k);
+          t.onsuccess = () => res();
+          t.onerror = () => rej(t.error);
+        });
+      } catch (e) {}
+    }
+    async function idbDel(k) {
+      try {
+        const d = await idbOpen();
+        return await new Promise((res, rej) => {
+          const t = d.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).delete(k);
+          t.onsuccess = () => res();
+          t.onerror = () => rej(t.error);
+        });
+      } catch (e) {}
+    }
+
+    const fsSupported = () => 'showDirectoryPicker' in window;
+
+    async function loadDirHandle() {
+      if (!fsSupported()) return;
+      const h = await idbGet('bkDir');
+      if (h) bkDirHandle = h;
+      updateDirLabel();
+    }
+    function updateDirLabel() {
+      const el = document.getElementById('bkDir');
+      if (!el) return;
+      if (!fsSupported()) { el.textContent = '(navegador sem suporte — usando Downloads)'; return; }
+      el.textContent = bkDirHandle ? `✔ ${bkDirHandle.name}` : '(não definida — usando Downloads)';
+    }
+    async function ensureDirPermission() {
+      if (!bkDirHandle) return false;
+      let q = await bkDirHandle.queryPermission({ mode: 'readwrite' });
+      if (q === 'granted') return true;
+      q = await bkDirHandle.requestPermission({ mode: 'readwrite' });
+      return q === 'granted';
+    }
+    async function chooseDir() {
+      if (!fsSupported()) { toast('Este navegador não permite escolher pasta. Use Chrome/Edge no desktop.', 'error'); return; }
+      try {
+        const h = await window.showDirectoryPicker({ mode: 'readwrite', id: 'sgrh-bk' });
+        bkDirHandle = h;
+        await idbSet('bkDir', h);
+        updateDirLabel();
+        toast('Pasta de backup definida ✔');
+      } catch (e) {
+        if (e.name !== 'AbortError') toast('Não foi possível selecionar a pasta.', 'error');
+      }
+    }
+    async function forgetDir() {
+      if (!confirm('Esquecer a pasta de backup? Os próximos backups voltam a ser baixados em Downloads.')) return;
+      bkDirHandle = null;
+      await idbDel('bkDir');
+      updateDirLabel();
+      toast('Pasta esquecida.');
+    }
+
+    async function saveToDir(name, txt, type) {
+      if (!bkDirHandle) return false;
+      if (!(await ensureDirPermission())) return false;
+      try {
+        const fh = await bkDirHandle.getFileHandle(name, { create: true });
+        const w = await fh.createWritable();
+        await w.write(new Blob([txt], { type }));
+        await w.close();
+        return true;
+      } catch (e) {
+        toast('⚠️ Falha ao gravar na pasta: ' + e.message, 'error');
+        return false;
+      }
+    }
+
+    function dl(name, txt, type) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([txt], { type }));
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    async function saveFile(name, txt, type) {
+      const ok = await saveToDir(name, txt, type);
+      if (!ok) dl(name, txt, type);
+      return ok;
+    }
+
+    /* ==================== CSV, BACKUP MENSAL / COMPLETO, RESTAURAÇÃO & UNDO ==================== */
+    async function exportCSV() {
+      const L = [['Data', 'Turno/Tipo', 'Colaboradores', 'Categoria', 'Status', 'Campo 1', 'Campo 2', 'Campo 3', 'Campo 4', 'Campo 5', 'Familiares / Visitantes']];
+      for (const [d, tt] of Object.entries(db[mk()] || {})) {
+        for (const t of ['SD', 'SN']) {
+          const b = tt[t];
+          if (!b) continue;
+          for (const [sk, rows] of Object.entries(b.secs || {})) {
+            rows.filter(r => !vazia(r)).forEach(r => L.push([
+              `${p2(d)}/${p2(st.mes)}/${st.ano}`,
+              t,
+              b.colab,
+              SECS.find(s => s[0] === sk)[1],
+              r.s === 'a' ? 'Agendada' : 'Realizada',
+              ...[0, 1, 2, 3, 4].map(i => r.v[i] || ''),
+              famTxt(r.f)
+            ]));
           }
         }
-        (tt.visitas||[]).forEach(vp=>{
-          const tx=`${vp.pac} ${vp.leito} ${vp.obs||''} ${visTxt(vp.v)}`;
-          if(tx.toLowerCase().includes(q))out.push({k,d,t:'VIS',view:'vis',sn:'CONTROLE DE VISITAS',tx:tx.trim().slice(0,110)});
+        (tt.visitas || []).forEach(p => L.push([
+          `${p2(d)}/${p2(st.mes)}/${st.ano}`,
+          'VISITAS',
+          '',
+          'CONTROLE DE VISITAS',
+          'Registrada',
+          p.pac,
+          p.leito,
+          p.obs || '',
+          '',
+          '',
+          visTxt(p.v)
+        ]));
+      }
+      const csv = '\ufeff' + L.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+      const viaPasta = await saveFile(`demandas_${mk()}.csv`, csv, 'text/csv');
+      toast(viaPasta ? 'CSV salvo na pasta ✔' : 'CSV exportado ✔');
+    }
+
+    const cntM = m => Object.values(m || {}).reduce((a, d) => a + cnt(d.SD) + cnt(d.SN) + (Array.isArray(d.visitas) ? d.visitas.filter(p => (p.v || []).some(v => v.n)).length : 0), 0);
+    const fdt = t => t ? new Date(t).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'nunca';
+    const lab = k => `${MESES[+k.slice(5) - 1]}/${k.slice(0, 4)}`;
+    const stamp = () => { const d = new Date(); return `${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}`; };
+    function stat(k) {
+      if (!cntM(db[k])) return 'vazio';
+      if (!meta.bk[k]) return 'nunca';
+      return (meta.alt[k] || 0) > meta.bk[k] ? 'pendente' : 'ok';
+    }
+
+    function aviso() {
+      const k = mk(), s = stat(k), banner = document.getElementById('backup-warning-banner');
+      if (!banner) return;
+      if (s === 'ok' || s === 'vazio') {
+        banner.classList.add('hidden');
+        return;
+      }
+      banner.classList.remove('hidden');
+      document.getElementById('backup-warning-text').innerHTML = `<b>${lab(k)}</b>: ${s === 'nunca' ? 'ainda não tem backup salvo' : 'há alterações desde o último backup (' + fdt(meta.bk[k]) + ')'}.`;
+    }
+
+    async function bkMes(k) {
+      const m = db[k];
+      if (!m) return;
+      const nome = `backup_demandas_${k}_${stamp()}.json`;
+      const conteudo = JSON.stringify({ app: 'relatorio-demandas', versao: 2, tipo: 'mes', mes: k, exportadoEm: new Date().toISOString(), registros: cntM(m), dados: { [k]: m } });
+      const viaPasta = await saveFile(nome, conteudo, 'application/json');
+      meta.bk[k] = Date.now();
+      saveMeta();
+      aviso();
+      if (!document.getElementById('backup-modal').classList.contains('hidden')) renderBackupModalUI();
+      toast(viaPasta ? `Backup de ${lab(k)} salvo na pasta ✔` : `Backup de ${lab(k)} baixado ✔`);
+    }
+
+    async function bkTudo() {
+      const nome = `backup_demandas_COMPLETO_${stamp()}.json`;
+      const conteudo = JSON.stringify({ app: 'relatorio-demandas', versao: 2, tipo: 'completo', exportadoEm: new Date().toISOString(), registros: Object.values(db).reduce((a, m) => a + cntM(m), 0), dados: db });
+      const viaPasta = await saveFile(nome, conteudo, 'application/json');
+      Object.keys(db).forEach(k => { if (cntM(db[k])) meta.bk[k] = Date.now(); });
+      saveMeta();
+      aviso();
+      renderBackupModalUI();
+      toast(viaPasta ? 'Backup completo salvo na pasta ✔' : 'Backup completo baixado ✔');
+    }
+
+    function openBackupModal() {
+      renderBackupModalUI();
+      document.getElementById('backup-modal').classList.remove('hidden');
+    }
+    function closeBackupModal() {
+      document.getElementById('backup-modal').classList.add('hidden');
+    }
+
+    function renderBackupModalUI() {
+      const ks = [...new Set([...Object.keys(db), mk()])].sort().reverse();
+      const E = {
+        ok: '<span class="text-emerald-600 font-bold">✔ em dia</span>',
+        pendente: '<span class="text-red-600 font-bold">alterado após backup</span>',
+        nunca: '<span class="text-red-600 font-bold">sem backup</span>',
+        vazio: '<span class="text-slate-400">vazio</span>'
+      };
+      const hasSnap = !!localStorage.getItem(KEY + '_snap');
+
+      document.getElementById('bkbox').innerHTML = `
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p class="font-bold text-slate-700">📁 Pasta de backup: <span id="bkDir" class="text-sky-700">…</span></p>
+          </div>
+          <div class="flex gap-1.5">
+            <button type="button" onclick="chooseDir()" class="bg-white hover:bg-slate-100 border border-slate-300 px-2.5 py-1.5 rounded-lg font-semibold">📁 Escolher pasta…</button>
+            <button type="button" onclick="forgetDir()" class="bg-white hover:bg-slate-100 border border-slate-300 px-2.5 py-1.5 rounded-lg text-slate-500">✖ Esquecer</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 border-b border-slate-200 text-slate-600">
+              <tr><th class="p-2.5">Mês</th><th class="p-2.5">Registros</th><th class="p-2.5">Último backup</th><th class="p-2.5 text-right">Ação</th></tr>
+            </thead>
+            <tbody>
+              ${ks.map(k => `<tr class="border-b border-slate-100">
+                <td class="p-2.5 font-bold">${lab(k)}</td>
+                <td class="p-2.5">${cntM(db[k])}</td>
+                <td class="p-2.5">${fdt(meta.bk[k])} • ${E[stat(k)]}</td>
+                <td class="p-2.5 text-right"><button type="button" onclick="bkMes('${k}')" class="bg-slate-100 hover:bg-slate-200 border border-slate-300 px-2.5 py-1 rounded-lg font-semibold">Salvar mês</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button type="button" onclick="bkTudo()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-3.5 py-2 rounded-xl shadow-sm">💾 Backup completo</button>
+          <input type="file" id="fileJsonBackup" accept=".json,application/json" hidden onchange="restoreFullBackup(event)">
+          <button type="button" onclick="document.getElementById('fileJsonBackup').click()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2 rounded-xl shadow-sm">📂 Carregar backup…</button>
+          <button type="button" onclick="desfazer()" ${hasSnap ? '' : 'disabled'} class="bg-slate-100 hover:bg-slate-200 disabled:opacity-40 border border-slate-300 font-semibold px-3 py-2 rounded-xl">↩️ Desfazer última importação</button>
+        </div>
+
+        <p class="text-[11px] text-slate-500">Salve o backup ao fim de cada semana/plantão e guarde cópias fora deste PC (pendrive ou nuvem). <span id="pers"></span></p>
+      `;
+      updateDirLabel();
+      try {
+        navigator.storage.persisted().then(p => {
+          const e = document.getElementById('pers');
+          if (e) e.textContent = p ? 'Armazenamento protegido pelo navegador: sim.' : 'Mantenha os backups em dia.';
         });
-      }
+      } catch (e) {}
     }
-  }
-  out.sort((a,b)=>(a.k+p2(a.d)).localeCompare(b.k+p2(b.d)));
-  const vis=out.slice(0,100);
-  $('#res').innerHTML=vis.map((o,i)=>`<div data-i="${i}"><b>${p2(o.d)}/${o.k.slice(5)}/${o.k.slice(0,4)} ${o.t}</b> — ${o.sn}<br><span class="tip">${esc(o.tx)}</span></div>`).join('')||(q.length>=2?'<p class="tip">Nada encontrado.</p>':'');
-  $('#res').onclick=ev=>{
-    const dv=ev.target.closest('div[data-i]');if(!dv)return;
-    const o=vis[+dv.dataset.i];if(!o)return;
-    st.ano=+o.k.slice(0,4);st.mes=+o.k.slice(5);st.dia=+o.d;
-    if(o.view==='vis'){st.v='vis'}
-    else{st.turno=o.t;st.v='op'}
-    $('#dlg').close();render();
-  };
-};
 
-$('#bPrint').onclick=()=>window.print();
-$('#bTema').onclick=()=>{const r=document.documentElement,dk=matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.t=(r.dataset.t||(dk?'d':'l'))==='d'?'l':'d';try{localStorage.setItem(KEY+'_tema',r.dataset.t)}catch(e){}};
-try{const t=localStorage.getItem(KEY+'_tema');if(t)document.documentElement.dataset.t=t}catch(e){}
-try{navigator.storage.persist()}catch(e){}
-
-/* ==================== IMPORTAÇÃO DE PLANILHA XLSX ==================== */
-
-const SEC_MAP = {
-  'ADMISSOES': 'adm',
-  'ALTAS': 'alt',
-  'TRANSFERENCIAS EXTERNAS': 'tex',
-  'TRANSFERENCIAS INTERNAS': 'tin',
-  'OBITO': 'obi',
-  'EXAMES /PROCEDIMENTOS': 'exa',
-  'DEMANDAS EXTRAS': 'dem'
-};
-
-const normTxt = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();
-
-function isRed(cell) {
-  if (!cell || !cell.s) return false;
-  const c = cell.s.fgColor || cell.s.color;
-  if (!c) return false;
-  if (c.rgb) {
-    const hex = c.rgb.replace('#','').toUpperCase();
-    if (hex.length === 6) {
-      const r = parseInt(hex.slice(0,2),16);
-      const g = parseInt(hex.slice(2,4),16);
-      const b = parseInt(hex.slice(4,6),16);
-      return r >= 150 && g <= 100 && b <= 100;
-    }
-  }
-  if (typeof c.indexed === 'number' && (c.indexed === 2 || c.indexed === 10)) return true;
-  return false;
-}
-
-function cv(cell) {
-  if (!cell) return '';
-  let v = cell.v;
-  if (v == null) return '';
-  if (typeof v === 'number') {
-    if (v > 0 && v < 1) {
-      const totalMin = Math.round(v * 24 * 60);
-      const hh = String(Math.floor(totalMin / 60)).padStart(2,'0');
-      const mm = String(totalMin % 60).padStart(2,'0');
-      return `${hh}:${mm}`;
-    }
-    return String(v);
-  }
-  return String(v).replace(/\r?\n/g,' ').trim();
-}
-
-function parseContato(familiar, contato) {
-  let fam = (familiar || '').trim();
-  let tel = (contato || '').trim();
-  let full = [fam, tel].filter(Boolean).join(' ');
-  if (!full) return null;
-
-  let cpf = '';
-  const mCpf = full.match(/(\d{3}\.?\d{3}\.?\d{3}-?\d{2})/);
-  if (mCpf) { cpf = mCpf[1]; full = full.replace(mCpf[0], ' '); }
-
-  let telefone = '';
-  const mTel = full.match(/(\(?\d{2}\)?\s*\d{4,5}[-\s]?\d{4})/);
-  if (mTel) { telefone = mTel[1]; full = full.replace(mTel[0], ' '); }
-
-  let nome = full.replace(/\([^)]*\)/g, ' ').replace(/\s+/g,' ').trim();
-
-  let parentesco = '';
-  const mPar = (familiar || '').match(/\(([^)]+)\)/);
-  if (mPar) parentesco = mPar[1].trim();
-
-  return { p: parentesco, n: nome, c: cpf, t: telefone || tel };
-}
-
-function parseTurno(rows, startRow) {
-  const blk = { colab: '', secs: { adm:[], alt:[], tex:[], tin:[], obi:[], exa:[], dem:[] } };
-  let i = startRow;
-  let secAtual = null;
-  let headerRow = null;
-
-  while (i < rows.length) {
-    const row = rows[i] || [];
-    const first = normTxt(cv(row[0]));
-
-    if (first.startsWith('RELATORIO COMPARTILHADO')) break;
-
-    // Colaboradores (procura em qualquer célula)
-    for (let c = 0; c < row.length; c++) {
-      const t = normTxt(cv(row[c]));
-      if (t.startsWith('COLABORADORES')) {
-        blk.colab = cv(row[c]).replace(/COLABORADORES\s*:?\s*/i,'').trim();
+    function desfazer() {
+      try {
+        const s = JSON.parse(localStorage.getItem(KEY + '_snap'));
+        if (!s || !confirm('Voltar os dados ao estado de ' + fdt(s.em) + ' (antes da última importação)?')) return;
+        db = s.db;
+        meta = s.meta || meta;
+        localStorage.setItem(KEY, JSON.stringify(db));
+        saveMeta();
+        localStorage.removeItem(KEY + '_snap');
+        renderAll();
+        renderBackupModalUI();
+        toast('Importação desfeita ✔');
+      } catch (e) {
+        alert('Não foi possível desfazer.');
       }
     }
 
-    if (SEC_MAP[first]) {
-      secAtual = SEC_MAP[first];
-      headerRow = null;
-      i++; continue;
+    function restoreFullBackup(e) {
+      const f = e.target.files[0];
+      e.target.value = '';
+      if (!f) return;
+      const rd = new FileReader();
+      rd.onload = () => {
+        try {
+          const o = JSON.parse(rd.result);
+          if (!o || o.app !== 'relatorio-demandas' || typeof o.dados !== 'object') throw new Error('Formato inválido');
+          mig(o.dados);
+          const ks = Object.keys(o.dados).sort();
+          const n = Object.values(o.dados).reduce((a, m) => a + cntM(m), 0);
+          if (o.registros != null && o.registros !== n) {
+            alert(`Arquivo possivelmente corrompido: esperado ${o.registros} registros, encontrados ${n}. Importação cancelada.`);
+            return;
+          }
+          const rep = confirm(`Backup com ${n} registros de: ${ks.map(lab).join(', ')}.\n\nOK = SUBSTITUIR esses meses pelos do arquivo (os outros meses não são alterados).\nCancelar = MESCLAR (junta por dia/turno e mantém o restante).`);
+          try { localStorage.setItem(KEY + '_snap', JSON.stringify({ em: Date.now(), db, meta })); } catch (_) {}
+          ks.forEach(k => {
+            if (rep) db[k] = o.dados[k];
+            else {
+              db[k] = db[k] || {};
+              Object.entries(o.dados[k]).forEach(([d, tt]) => { db[k][d] = Object.assign(db[k][d] || {}, tt); });
+            }
+            meta.bk[k] = Date.now();
+            meta.alt[k] = 0;
+          });
+          try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (_) {}
+          saveMeta();
+          const l = ks[ks.length - 1];
+          if (l && !db[mk()]) {
+            st.ano = +l.slice(0, 4);
+            st.mes = +l.slice(5);
+            st.dia = 1;
+            updateDayDropdowns();
+          }
+          renderAll();
+          renderBackupModalUI();
+          toast('Backup importado ✔ (dá para desfazer em 💾 Backup)');
+        } catch (err) {
+          alert('Arquivo inválido. Selecione um backup .json exportado por este sistema.');
+        }
+      };
+      rd.readAsText(f);
     }
 
-    if (first === 'NOME DO PACIENTE') {
-      headerRow = i;
-      if (secAtual === 'exa') { i += 2; }
-      else { i += 1; }
-      continue;
-    }
+    /* ==================== IMPORTAÇÃO DE PLANILHA XLSX (INTELIGENTE) ==================== */
+    const SEC_MAP = {
+      'ADMISSOES': 'adm',
+      'ALTAS': 'alt',
+      'TRANSFERENCIAS EXTERNAS': 'tex',
+      'TRANSFERENCIAS INTERNAS': 'tin',
+      'OBITO': 'obi',
+      'EXAMES /PROCEDIMENTOS': 'exa',
+      'EXAMES / PROCEDIMENTOS': 'exa',
+      'DEMANDAS EXTRAS': 'dem'
+    };
+    const normTxt = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
 
-    if (secAtual && first && !first.startsWith('NOME DO PACIENTE')) {
-      const paciente = cv(row[0]).trim();
-      if (!paciente) { i++; continue; }
-      if (/LEGENDA|ESCREVER DE|OBS:|PREENCHA/i.test(paciente)) { i++; continue; }
-
-      let v = [];
-      let status = isRed(row[0]) ? 'a' : 'r';
-
-      if (secAtual === 'adm' || secAtual === 'alt' || secAtual === 'obi') {
-        v = [paciente, cv(row[1]), cv(row[2])];
-      } else if (secAtual === 'tex') {
-        v = [paciente, cv(row[1]), cv(row[2]), cv(row[3])];
-      } else if (secAtual === 'tin') {
-        v = [paciente, cv(row[1]), cv(row[2]), cv(row[3])];
-      } else if (secAtual === 'exa') {
-        v = [paciente, cv(row[1]), cv(row[2]), cv(row[3]), cv(row[4])];
-      } else if (secAtual === 'dem') {
-        v = [paciente, cv(row[1]), cv(row[2]), cv(row[3])];
-      }
-
-      // Localiza colunas FAMILIAR / CONTATO no cabeçalho
-      let colFam = -1, colCont = -1;
-      if (headerRow != null) {
-        const hdr = rows[headerRow] || [];
-        const subHdr = rows[headerRow+1] || [];
-        for (let c = 0; c < Math.max(hdr.length, subHdr.length); c++) {
-          const ht = normTxt(cv(hdr[c]));
-          if (ht === 'FAMILIAR') colFam = c;
-          if (ht === 'CONTATO') colCont = c;
+    function isRedCell(cell) {
+      if (!cell || !cell.s) return false;
+      const c = cell.s.fgColor || cell.s.color;
+      if (!c) return false;
+      if (c.rgb) {
+        const hex = c.rgb.replace('#', '').toUpperCase();
+        if (hex.length === 6) {
+          const r = parseInt(hex.slice(0, 2), 16);
+          const g = parseInt(hex.slice(2, 4), 16);
+          const b = parseInt(hex.slice(4, 6), 16);
+          return r >= 150 && g <= 100 && b <= 100;
         }
       }
-      if (colFam < 0) {
-        if (secAtual === 'exa' || secAtual === 'dem') colFam = 5;
-        else colFam = 4;
-      }
-      if (colCont < 0) colCont = 6;
-
-      let familiar = cv(row[colFam]);
-      let contato = cv(row[colCont]);
-      if (!familiar && row[colFam-1]) familiar = cv(row[colFam-1]);
-
-      const f = parseContato(familiar, contato);
-      const fams = f ? [f] : [];
-
-      blk.secs[secAtual].push({ v, s: status, f: fams });
-      i++; continue;
+      if (typeof c.indexed === 'number' && (c.indexed === 2 || c.indexed === 10)) return true;
+      return false;
     }
 
-    i++;
-  }
-
-  return { blk, next: i };
-}
-
-function parseSheet(sheetName, rows) {
-  let dia = null;
-  const m = sheetName.match(/^(\d{1,2})\.(\d{1,2})$/);
-  if (m) dia = parseInt(m[1], 10);
-
-  if (!dia) {
-    for (const row of rows.slice(0, 5)) {
-      for (const cell of row) {
-        const t = cv(cell);
-        const md = t.match(/DIA:\s*(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
-        if (md) { dia = parseInt(md[1],10); break; }
+    function cellVal(cell) {
+      if (!cell) return '';
+      let v = cell.v;
+      if (v == null) return '';
+      if (typeof v === 'number') {
+        if (v > 0 && v < 1) {
+          const totalMin = Math.round(v * 24 * 60);
+          return `${p2(Math.floor(totalMin / 60))}:${p2(totalMin % 60)}`;
+        }
+        return String(v);
       }
-      if (dia) break;
+      return String(v).replace(/\r?\n/g, ' ').trim();
     }
-  }
-  if (!dia) return null;
 
-  let sdStart = -1, snStart = -1;
-  for (let i = 0; i < rows.length; i++) {
-    const t = normTxt(cv(rows[i][0]));
-    if (t === 'TURNO: SD') sdStart = i;
-    if (t === 'TURNO: SN') snStart = i;
-  }
+    function parseContatoXlsx(familiar, contato) {
+      let fam = (familiar || '').trim();
+      let tel = (contato || '').trim();
+      let full = [fam, tel].filter(Boolean).join(' ');
+      if (!full) return null;
 
-  let sd = null, sn = null;
-  if (sdStart >= 0) {
-    const end = snStart > sdStart ? snStart : rows.length;
-    sd = parseTurno(rows.slice(0, end), sdStart);
-    let colabSD = '';
-    for (let k = Math.max(0, sdStart-4); k < sdStart; k++) {
-      for (const c of (rows[k]||[])) {
-        const t = cv(c);
-        if (/COLABORADORES/i.test(t)) {
-          colabSD = t.replace(/COLABORADORES\s*:?\s*/i,'').replace(/[-/\\]/g, ' ').replace(/\bSD\b|\bSN\b/gi, '').replace(/\s+/g, ' ').trim().toUpperCase();
+      let cpf = '';
+      const mCpf = full.match(/(\d{3}\.?\d{3}\.?\d{3}-?\d{2})/);
+      if (mCpf) { cpf = mCpf[1]; full = full.replace(mCpf[0], ' '); }
+
+      let telefone = '';
+      const mTel = full.match(/(\(?\d{2}\)?\s*\d{4,5}[-\s]?\d{4})/);
+      if (mTel) { telefone = mTel[1]; full = full.replace(mTel[0], ' '); }
+
+      let nome = full.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+      let parentesco = '';
+      const mPar = (familiar || '').match(/\(([^)]+)\)/);
+      if (mPar) parentesco = mPar[1].trim();
+
+      return { p: parentesco, n: nome, c: cpf, t: telefone || tel };
+    }
+
+    function parseTurnoXlsx(rows, startRow) {
+      const b = { colab: '', secs: { adm: [], alt: [], tex: [], tin: [], obi: [], exa: [], dem: [] } };
+      let i = startRow, secAtual = null, headerRow = null;
+
+      while (i < rows.length) {
+        const row = rows[i] || [];
+        const first = normTxt(cellVal(row[0]));
+        if (first.startsWith('RELATORIO COMPARTILHADO')) break;
+
+        for (let c = 0; c < row.length; c++) {
+          const t = normTxt(cellVal(row[c]));
+          if (t.startsWith('COLABORADORES')) b.colab = cellVal(row[c]).replace(/COLABORADORES\s*:?\s*/i, '').trim();
+        }
+
+        if (SEC_MAP[first]) { secAtual = SEC_MAP[first]; headerRow = null; i++; continue; }
+        if (first === 'NOME DO PACIENTE') { headerRow = i; i += (secAtual === 'exa' ? 2 : 1); continue; }
+
+        if (secAtual && first && !first.startsWith('NOME DO PACIENTE')) {
+          const paciente = cellVal(row[0]).trim();
+          if (!paciente || /LEGENDA|ESCREVER DE|OBS:|PREENCHA/i.test(paciente)) { i++; continue; }
+
+          let v = [];
+          const status = isRedCell(row[0]) ? 'a' : 'r';
+
+          if (secAtual === 'adm' || secAtual === 'alt' || secAtual === 'obi') v = [paciente, cellVal(row[1]), cellVal(row[2])];
+          else if (secAtual === 'tex' || secAtual === 'tin' || secAtual === 'dem') v = [paciente, cellVal(row[1]), cellVal(row[2]), cellVal(row[3])];
+          else if (secAtual === 'exa') v = [paciente, cellVal(row[1]), cellVal(row[2]), cellVal(row[3]), cellVal(row[4])];
+
+          let colFam = -1, colCont = -1;
+          if (headerRow != null) {
+            const hdr = rows[headerRow] || [], subHdr = rows[headerRow + 1] || [];
+            for (let c = 0; c < Math.max(hdr.length, subHdr.length); c++) {
+              const ht = normTxt(cellVal(hdr[c]));
+              if (ht === 'FAMILIAR') colFam = c;
+              if (ht === 'CONTATO') colCont = c;
+            }
+          }
+          if (colFam < 0) colFam = (secAtual === 'exa' || secAtual === 'dem') ? 5 : 4;
+          if (colCont < 0) colCont = 6;
+
+          let familiar = cellVal(row[colFam]), contato = cellVal(row[colCont]);
+          if (!familiar && row[colFam - 1]) familiar = cellVal(row[colFam - 1]);
+
+          const f = parseContatoXlsx(familiar, contato);
+          b.secs[secAtual].push({ v, s: status, f: f ? [f] : [] });
+          i++; continue;
+        }
+        i++;
+      }
+      return { blk: b, next: i };
+    }
+
+    function parseSheetXlsx(sheetName, rows) {
+      let dia = null;
+      const m = sheetName.match(/^(\d{1,2})\.(\d{1,2})$/);
+      if (m) dia = parseInt(m[1], 10);
+      if (!dia) {
+        for (const row of rows.slice(0, 5)) {
+          for (const cell of row) {
+            const md = cellVal(cell).match(/DIA:\s*(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+            if (md) { dia = parseInt(md[1], 10); break; }
+          }
+          if (dia) break;
         }
       }
+      if (!dia) return null;
+
+      let sdStart = -1, snStart = -1;
+      for (let i = 0; i < rows.length; i++) {
+        const t = normTxt(cellVal(rows[i][0]));
+        if (t === 'TURNO: SD') sdStart = i;
+        if (t === 'TURNO: SN') snStart = i;
+      }
+
+      let sd = null, sn = null;
+      if (sdStart >= 0) {
+        const end = snStart > sdStart ? snStart : rows.length;
+        sd = parseTurnoXlsx(rows.slice(0, end), sdStart);
+        let colabSD = '';
+        for (let k = Math.max(0, sdStart - 4); k < sdStart; k++) {
+          for (const c of (rows[k] || [])) {
+            const t = cellVal(c);
+            if (/COLABORADORES/i.test(t)) colabSD = t.replace(/COLABORADORES\s*:?\s*/i, '').trim();
+          }
+        }
+        sd.blk.colab = colabSD || sd.blk.colab;
+      }
+      if (snStart >= 0) {
+        sn = parseTurnoXlsx(rows, snStart);
+        let colabSN = '';
+        for (let k = Math.max(0, snStart - 4); k < snStart; k++) {
+          for (const c of (rows[k] || [])) {
+            const t = cellVal(c);
+            if (/COLABORADORES/i.test(t)) colabSN = t.replace(/COLABORADORES\s*:?\s*/i, '').trim();
+          }
+        }
+        sn.blk.colab = colabSN || sn.blk.colab;
+      }
+      return { dia, sd: sd?.blk, sn: sn?.blk };
     }
-    sd.blk.colab = colabSD || sd.blk.colab;
-  }
-  if (snStart >= 0) {
-    sn = parseTurno(rows, snStart);
-    let colabSN = '';
-    for (let k = Math.max(0, snStart-4); k < snStart; k++) {
-      for (const c of (rows[k]||[])) {
-        const t = cv(c);
-        if (/COLABORADORES/i.test(t)) {
-          colabSN = t.replace(/COLABORADORES\s*:?\s*/i,'').replace(/[-/\\]/g, ' ').replace(/\bSD\b|\bSN\b/gi, '').replace(/\s+/g, ' ').trim().toUpperCase();
+
+    async function handleFileImport(e) {
+      const file = e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      if (typeof XLSX === 'undefined') {
+        toast('Biblioteca SheetJS indisponível offline. Use Backup JSON.', 'error');
+        return;
+      }
+
+      try {
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: 'array', cellStyles: true, cellDates: false });
+
+        const fname = file.name.toLowerCase();
+        const nomesMes = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+        let mesDetectado = null;
+        for (let i = 0; i < nomesMes.length; i++) {
+          if (fname.includes(nomesMes[i])) { mesDetectado = i + 1; break; }
+        }
+        if (!mesDetectado) {
+          for (const sn of wb.SheetNames) {
+            const m = sn.match(/^\d{1,2}\.(\d{1,2})$/);
+            if (m) { mesDetectado = parseInt(m[1], 10); break; }
+          }
+        }
+
+        const confirmMsg = `Arquivo: ${file.name}\nAbas: ${wb.SheetNames.join(', ')}\n\nMês detectado: ${mesDetectado ? MESES[mesDetectado - 1] : '?'}\nAno atual no sistema: ${st.ano}\n\nOK = importar (mescla com dados existentes)\nCancelar = abortar`;
+        if (!confirm(confirmMsg)) return;
+
+        let importados = 0, diasImportados = [];
+        const targetMes = mesDetectado || st.mes;
+        const k = `${st.ano}-${p2(targetMes)}`;
+
+        for (const sheetName of wb.SheetNames) {
+          const ws = wb.Sheets[sheetName];
+          if (!ws) continue;
+          const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+          const rowsCells = [];
+          for (let R = range.s.r; R <= range.e.r; R++) {
+            const rowArr = [];
+            for (let C = range.s.c; C <= range.e.c; C++) {
+              rowArr.push(ws[XLSX.utils.encode_cell({ r: R, c: C })] || null);
+            }
+            rowsCells.push(rowArr);
+          }
+
+          const parsed = parseSheetXlsx(sheetName, rowsCells);
+          if (!parsed || !parsed.dia) continue;
+
+          ['sd', 'sn'].forEach(tk => {
+            const b = parsed[tk];
+            if (!b) return;
+            const turnoKey = tk.toUpperCase();
+            const existente = blk(true, turnoKey, parsed.dia, k);
+            SECS.forEach(([sk]) => {
+              (b.secs[sk] || []).forEach(novo => {
+                const dup = existente.secs[sk].some(r => nrm(r.v[0]) === nrm(novo.v[0]) && (r.v[2] || '') === (novo.v[2] || ''));
+                if (!dup) { existente.secs[sk].push(novo); importados++; }
+              });
+            });
+            if (b.colab && !existente.colab) existente.colab = b.colab;
+          });
+          diasImportados.push(parsed.dia);
+        }
+
+        st.mes = targetMes;
+        updateDayDropdowns();
+        save();
+        renderAll();
+        toast(`${importados} registro(s) importado(s) em ${diasImportados.length} dia(s) ✔`);
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao importar planilha: ' + err.message);
+      }
+    }
+
+    // Helper: ao selecionar setor na lista, adiciona " - " e foca para digitar o leito manualmente
+    document.addEventListener('change', e => {
+      if (e.target && e.target.getAttribute('list') === 'dl-setores') {
+        const val = e.target.value.trim();
+        if (SETORES_LISTA.includes(val)) {
+          e.target.value = val + ' - ';
+          e.target.focus();
         }
       }
-    }
-    sn.blk.colab = colabSN || sn.blk.colab;
-  }
-
-  return { dia, sd: sd?.blk, sn: sn?.blk };
-}
-
-async function importarXlsx(file) {
-  if (typeof XLSX === 'undefined') {
-    alert('Biblioteca SheetJS não carregada. Verifique a conexão ou hospede o xlsx.full.min.js localmente.');
-    return;
-  }
-  const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf, { type: 'array', cellStyles: true, cellDates: false });
-
-  const fname = file.name.toLowerCase();
-  const nomesMes = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-  let mesDetectado = null;
-  for (let i = 0; i < nomesMes.length; i++) {
-    if (fname.includes(nomesMes[i])) { mesDetectado = i + 1; break; }
-  }
-  if (!mesDetectado) {
-    for (const sn of wb.SheetNames) {
-      const m = sn.match(/^\d{1,2}\.(\d{1,2})$/);
-      if (m) { mesDetectado = parseInt(m[1],10); break; }
-    }
-  }
-
-  const confirmMsg = `Arquivo: ${file.name}\nAbas: ${wb.SheetNames.join(', ')}\n\n` +
-    `Mês detectado: ${mesDetectado ? MESES[mesDetectado-1] : '?'}\n` +
-    `Ano atual no sistema: ${st.ano}\n\n` +
-    `OK = importar (mescla com dados existentes)\nCancelar = abortar`;
-
-  if (!confirm(confirmMsg)) return;
-
-  let importados = 0;
-  let diasImportados = [];
-
-  for (const sheetName of wb.SheetNames) {
-    const ws = wb.Sheets[sheetName];
-    if (!ws) continue;
-
-    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-    const rowsCells = [];
-    for (let R = range.s.r; R <= range.e.r; R++) {
-      const rowArr = [];
-      for (let C = range.s.c; C <= range.e.c; C++) {
-        const addr = XLSX.utils.encode_cell({ r: R, c: C });
-        rowArr.push(ws[addr] || null);
-      }
-      rowsCells.push(rowArr);
-    }
-
-    const parsed = parseSheet(sheetName, rowsCells);
-    if (!parsed || !parsed.dia) continue;
-
-    const k = `${st.ano}-${p2(mesDetectado || st.mes)}`;
-    if (!db[k]) db[k] = {};
-    const dayObj = db[k][parsed.dia] || (db[k][parsed.dia] = {});
-
-    ['sd','sn'].forEach(tk => {
-      const blk = parsed[tk];
-      if (!blk) return;
-      const turnoKey = tk.toUpperCase();
-      const existente = dayObj[turnoKey] || (dayObj[turnoKey] = { colab: '', secs: {} });
-      SECS.forEach(([sk]) => {
-        if (!existente.secs[sk]) existente.secs[sk] = [];
-        (blk.secs[sk] || []).forEach(novo => {
-          const dup = existente.secs[sk].some(r =>
-            nrm(r.v[0]) === nrm(novo.v[0]) && (r.v[2] || '') === (novo.v[2] || '')
-          );
-          if (!dup) { existente.secs[sk].push(novo); importados++; }
-        });
-      });
-      if (blk.colab && !existente.colab) existente.colab = blk.colab;
     });
 
-    diasImportados.push(parsed.dia);
-  }
-
-  save();
-  render();
-  toast(`${importados} registro(s) importado(s) em ${diasImportados.length} dia(s) ✔`);
-}
-
-$('#bXlsx').onclick = () => $('#fileXlsx').click();
-$('#fileXlsx').onchange = e => {
-  const f = e.target.files[0];
-  e.target.value = '';
-  if (f) importarXlsx(f).catch(err => {
-    console.error(err);
-    alert('Erro ao importar planilha: ' + err.message);
-  });
-};
-
-loadDirHandle();
-init();
-</script>
+    window.onload = init;
+  </script>
 </body>
 </html>
